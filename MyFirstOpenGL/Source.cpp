@@ -13,6 +13,11 @@
 
 std::vector<GLuint> compiledPrograms;
 
+//Timer
+float globalTime = 0.0f;
+float lastFrameTime = 0.0f;
+float deltaTime = 0.0f;
+
 //Struct para controlar el GameObject (cubo)
 struct GameObject {
 
@@ -350,7 +355,7 @@ void main() {
 		};
 
 		//Definimos modo de dibujo para cada cara
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		//Ponemos los valores en el VBO creado
 		glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), cubeVertices, GL_STATIC_DRAW);
@@ -405,26 +410,41 @@ void main() {
 		//Asignar valores iniciales al programa
 		glUniform2f(glGetUniformLocation(compiledPrograms[0], "windowSize"), WINDOW_WIDTH, WINDOW_HEIGHT);
 
+		//Defino la transform inical del gameobject (cubo)
+		cube.position = glm::vec3(-0.5f, 0.f, 0.f);
+		cube.rotation = glm::vec3(60.f, 0.f, 0.f); //cooler looking starting angle
+		cube.scale = glm::vec3(0.5f, 0.5f, 0.5f);
+
+		const float sinWidth = 0.7f;
+
 		//Generamos el game loop
 		while (!glfwWindowShouldClose(window)) {
+
+			//Codigo generao con Claude 4.5, 
+			//Prompt: add a a timer counter, we will count the deltatime between frames and add it to a global time variable
+			float currentFrameTime = static_cast<float>(glfwGetTime());
+			deltaTime = currentFrameTime - lastFrameTime;
+			lastFrameTime = currentFrameTime;
+			globalTime += deltaTime;
+
+			//Mover el cubo segun el tiempo
+			cube.position.y = sin(globalTime) * sinWidth;
+
+			//Rotar en Y indefinidamente
+			cube.rotation.y += 5.f * deltaTime;
+
+			//Genero matrices de transformacion (cubo)
+			glm::mat4 translationMatrix = GenerateTranslationMatrix(cube.position);
+			glm::mat4 rotationMatrix = glm::mat4(1.0f);
+			if (glm::length(cube.rotation) > 0.0001f) {
+				rotationMatrix = GenerateRotationMatrix(cube.rotation, glm::length(cube.rotation));
+			}
+			glm::mat4 scaleMatrix = GenerateScaleMatrix(cube.scale);
 
 			//Pulleamos los eventos (botones, teclas, mouse...)
 			glfwPollEvents();
 
-			
-
-			//Defino la transformación del gameobject (cubo)
-			cube.position = glm::vec3(-0.5f, 0.f, 0.f);
-			cube.rotation = glm::vec3(0.f, 0.f, 0.f);
-			cube.scale = glm::vec3(0.5f, 0.5f, 0.5f);
-
-			//Genero matrices de transformacion
-			glm::mat4 translationMatrix = GenerateTranslationMatrix(cube.position);
-			glm::mat4 rotationMatrix = glm::mat4(1.0f);
-			if (glm::length(cube.rotation) > 0.0001f) { 
-				rotationMatrix = GenerateRotationMatrix(cube.rotation, glm::length(cube.rotation));
-			}
-			glm::mat4 scaleMatrix = GenerateScaleMatrix(cube.scale);
+	
 
 			//Pasamos las variables al shader
 			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "translationMatrix"), 1, GL_FALSE, glm::value_ptr(translationMatrix));
@@ -459,8 +479,6 @@ void main() {
 			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "translationMatrix"), 1, GL_FALSE, glm::value_ptr(longCubeTraslation));
 			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "rotationMatrix"), 1, GL_FALSE, glm::value_ptr(longCubeRotation));
 			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "scaleMatrix"), 1, GL_FALSE, glm::value_ptr(longCubeScale));
-
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 			glBindVertexArray(vaoPuntos);
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
