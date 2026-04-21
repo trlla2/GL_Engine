@@ -511,11 +511,22 @@ void main() {
 		glUniform2f(glGetUniformLocation(compiledPrograms[2], "windowSize"), WINDOW_WIDTH, WINDOW_HEIGHT);
 
 		//Defino la transform inical del gameobject (cubo)
-		cube.position = glm::vec3(-0.5f, 0.f, 0.f);
+		cube.position = glm::vec3(-0.6f, 0.f, 0.f);
 		cube.rotation = glm::vec3(60.f, 0.f, 0.f); //cooler looking starting angle
 		cube.scale = glm::vec3(0.5f, 0.5f, 0.5f);
 
 		const float sinWidth = 0.7f;
+		const float cubeRotaionSpeed = 10.f;
+
+
+		//Defino la transform inical del gameobject (ortodero)
+		rect.position = glm::vec3(0.f, 0.f, 0.f);
+		rect.rotation = glm::vec3(80.f, 0.f, 0.f); //cooler looking starting angle
+		rect.scale = glm::vec3(0.5f, 0.5f, 0.5f);
+
+		const float rectTargetScale = 1.f;
+		const float rectRotationSpeed = 20.f;
+		bool isExpanding = true;
 
 		float lastkeyPressTime = 0.f;
 		const float delayBetweenKeyPresses = 0.2f; // 200 ms delay
@@ -578,17 +589,41 @@ void main() {
 			cube.position.y = sin(globalTime) * sinWidth;
 
 			//Rotar en Y indefinidamente
-			cube.rotation.y += 5.f * deltaTime;
+			cube.rotation.y += cubeRotaionSpeed * deltaTime;
 
 			if(showCube)
 				RenderGameObject(cube, cubeVao, 1);
 
 			
-			// Orthohedron (long cube)
 
-			rect.position = glm::vec3(0.f, 0.f, 0.f);
-			rect.rotation = glm::vec3(0.f, 0.f, 0.f);
-			rect.scale = glm::vec3(0.5f, 0.75f, 0.5f);
+			//Definimos que queremos usar el VAO con los puntos
+			glBindVertexArray(cubeVao);
+
+			//Definimos que queremos dibujar
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
+
+			//Dejamos de usar el VAO indicado anteriormente
+			glBindVertexArray(0);
+
+
+			//Indicar a la tarjeta GPU que programa debe usar
+			glUseProgram(compiledPrograms[1]);
+
+			//rota z indefinidamente
+			rect.rotation.z += rectRotationSpeed * deltaTime;
+
+			//A ojo podemos observar que estos valores son acceptables para lo que queremos vislauizar
+			//basados en pura intuición, el cub se expanidirá y contraerá cada 3 segundos
+			isExpanding = (int)globalTime % 6 < 3;
+
+			if (isExpanding)
+			{
+				rect.scale += glm::vec3(0.5f, 0.0f, -0.5f) * deltaTime; // Escala de crecimiento menos en y para que escale como ortoedro que es 
+			}
+			else
+			{
+				rect.scale -= glm::vec3(0.5f, 0.0f, -0.5f) * deltaTime; // Escala de decrecimiento menos en y para que escale como ortoedro que es 
+			}
 
 			if(showRect)
 				RenderGameObject(rect, rectVao, 1);
