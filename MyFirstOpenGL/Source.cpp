@@ -303,7 +303,7 @@ void main() {
 		//Declarar instancia de GameObject
 		GameObject cube;
 		GameObject pyramid;
-		
+		GameObject longCube;
 
 		//Compilar shaders
 		ShaderProgram myFirstProgram;
@@ -414,9 +414,9 @@ void main() {
 			
 
 			//Defino la transformación del gameobject (cubo)
-			cube.position = glm::vec3(0.f, 0.f, 0.f);
+			cube.position = glm::vec3(-0.5f, 0.f, 0.f);
 			cube.rotation = glm::vec3(0.f, 0.f, 0.f);
-			cube.scale = glm::vec3(0.7f, 0.7f, 0.7f);
+			cube.scale = glm::vec3(0.5f, 0.5f, 0.5f);
 
 			//Genero matrices de transformacion
 			glm::mat4 translationMatrix = GenerateTranslationMatrix(cube.position);
@@ -443,10 +443,33 @@ void main() {
 			//Dejamos de usar el VAO indicado anteriormente
 			glBindVertexArray(0);
 
+			// Orthohedron (long cube)
+
+			longCube.position = glm::vec3(0.f, 0.f, 0.f);
+			longCube.rotation = glm::vec3(0.f, 0.f, 0.f);
+			longCube.scale = glm::vec3(0.5f, 0.75f, 0.5f);
+
+			glm::mat4 longCubeTraslation = GenerateTranslationMatrix(longCube.position);
+			glm::mat4 longCubeRotation = glm::mat4(1.0f);
+			if (glm::length(longCube.rotation) > 0.0001f) {
+				longCubeRotation = GenerateRotationMatrix(longCube.rotation, glm::length(longCube.rotation));
+			}
+			glm::mat4 longCubeScale = GenerateScaleMatrix(longCube.scale);
+
+			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "translationMatrix"), 1, GL_FALSE, glm::value_ptr(longCubeTraslation));
+			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "rotationMatrix"), 1, GL_FALSE, glm::value_ptr(longCubeRotation));
+			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "scaleMatrix"), 1, GL_FALSE, glm::value_ptr(longCubeScale));
+
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+			glBindVertexArray(vaoPuntos);
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
+			glBindVertexArray(0);
+
 			// pyramid
-			pyramid.position = glm::vec3(0.5f, 0.5f, 0.0f);
-			pyramid.rotation = glm::vec3(271.f, 0.f, 0.f);
-			pyramid.scale = glm::vec3(0.5f, 0.5f, 0.5f);
+			pyramid.position = glm::vec3(0.5f, 0.f, 0.0f);
+			pyramid.rotation = glm::vec3(-90.1f, 0.f, 0.f);
+			pyramid.scale = glm::vec3(0.75f, .75f, 1.5f);
 
 			glm::mat4 pyramidTranslation = GenerateTranslationMatrix(pyramid.position);
 			glm::mat4 pyramidRotation = glm::mat4(1.0f);
