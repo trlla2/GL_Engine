@@ -618,11 +618,11 @@ void main() {
 
 			if (isExpanding)
 			{
-				rect.scale += glm::vec3(0.5f, 0.0f, -0.5f) * deltaTime; // Escala de crecimiento menos en y para que escale como ortoedro que es 
+				rect.scale += glm::vec3(0.3f, 0.0f, -0.4f) * deltaTime; // Escala de crecimiento menos en y para que escale como ortoedro que es 
 			}
 			else
 			{
-				rect.scale -= glm::vec3(0.5f, 0.0f, -0.5f) * deltaTime; // Escala de decrecimiento menos en y para que escale como ortoedro que es 
+				rect.scale -= glm::vec3(0.3f, 0.0f, -0.4f) * deltaTime; 
 			}
 
 			if(showRect)
