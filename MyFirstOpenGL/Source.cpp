@@ -28,17 +28,6 @@ struct ShaderProgram {
 	GLuint fragmentShader = 0;
 };
 
-struct Camera {
-
-	int minFov = 1, maxFov = 90;
-
-	glm::vec3 position = glm::vec3(0.5f, 0.5f, 1.f);
-	glm::vec3 localVectorUp = glm::vec3(0.f, 1.f, 0.f);
-
-	float fFov = 45.f;
-	float fNear = 0.1f;
-	float fFar = 10.f;
-};
 
 void Resize_Window(GLFWwindow* window, int iFrameBufferWidth, int iFrameBufferHeight) {
 
@@ -314,8 +303,7 @@ void main() {
 		//Declarar instancia de GameObject
 		GameObject cube;
 
-		//Declarar instancia de camera
-		Camera camera;
+		
 
 		//Compilar shaders
 		ShaderProgram myFirstProgram;
@@ -391,50 +379,25 @@ void main() {
 			//Pulleamos los eventos (botones, teclas, mouse...)
 			glfwPollEvents();
 
-			if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-				camera.position += glm::vec3(0.f, 0.01f, 0.f);
-			if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-				camera.position += glm::vec3(0.f, -0.01f, 0.f);
-			if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-				camera.position += glm::vec3(-0.01f, 0.f, 0.f);
-			if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-				camera.position += glm::vec3(0.01f, 0.f, 0.f);
-
-			if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
-				camera.position += glm::vec3(0.f, 0.f, -0.01f);
-			if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS)
-				camera.position += glm::vec3(0.f, 0.f, 0.01f);
+			
 
 			//Defino la transformación del gameobject (cubo)
-			cube.position = glm::vec3(0.5f, 0.5f, 0.f);
-			cube.rotation = glm::vec3(0.f, 45.f, 0.f);
+			cube.position = glm::vec3(0.f, 0.f, 0.f);
+			cube.rotation = glm::vec3(0.f, 0.f, 0.f);
 			cube.scale = glm::vec3(0.7f, 0.7f, 0.7f);
 
 			//Genero matrices de transformacion
 			glm::mat4 translationMatrix = GenerateTranslationMatrix(cube.position);
-			glm::mat4 rotationMatrix = GenerateRotationMatrix(cube.rotation, cube.rotation.y);
+			glm::mat4 rotationMatrix = glm::mat4(1.0f);
+			if (glm::length(cube.rotation) > 0.0001f) { // Solo calcula si hay rotación significativa
+				rotationMatrix = GenerateRotationMatrix(cube.rotation, glm::length(cube.rotation));
+			}
 			glm::mat4 scaleMatrix = GenerateScaleMatrix(cube.scale);
-
-			//Genero matriz de vista
-			glm::mat4 viewMatrix = glm::lookAt(camera.position, camera.position + glm::vec3(0.f, 0.f, -1.f), camera.localVectorUp);
-			
-			if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS)
-				camera.fFov += 0.5f;
-			if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS)
-				camera.fFov -= 0.5f;
-
-			camera.fFov = camera.fFov < camera.minFov ? camera.minFov : camera.fFov;
-			camera.fFov = camera.fFov > camera.maxFov ? camera.maxFov : camera.fFov;
-
-
-			glm::mat4 projectionMatrix = glm::perspective(glm::radians(camera.fFov), (float)(WINDOW_WIDTH) / (float)(WINDOW_HEIGHT), camera.fNear, camera.fFar);
 
 			//Pasamos las variables al shader
 			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "translationMatrix"), 1, GL_FALSE, glm::value_ptr(translationMatrix));
 			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "rotationMatrix"), 1, GL_FALSE, glm::value_ptr(rotationMatrix));
 			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "scaleMatrix"), 1, GL_FALSE, glm::value_ptr(scaleMatrix));
-			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "viewMatrix"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
-			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 
 			//Limpiamos los buffers
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
