@@ -32,14 +32,32 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="MyFirstVertexShader.glsl">
+    <None Include="CubeVertexShader.glsl">
       <Filter>Shaders\Vertex Shader</Filter>
     </None>
-    <None Include="MyFirstGeometryShader.glsl">
+    <None Include="CubeGeometryShader.glsl">
       <Filter>Shaders\Geometry Shader</Filter>
     </None>
-    <None Include="MyFirstFragmentShader.glsl">
+    <None Include="CubeFragmentShader.glsl">
       <Filter>Shaders\Fragment Shader</Filter>
+    </None>
+    <None Include="PyramidFragmentShader.glsl">
+      <Filter>Shaders\Fragment Shader</Filter>
+    </None>
+    <None Include="RectFragmentShader.glsl">
+      <Filter>Shaders\Fragment Shader</Filter>
+    </None>
+    <None Include="PyramidGeometryShader.glsl">
+      <Filter>Shaders\Geometry Shader</Filter>
+    </None>
+    <None Include="RectGeometryShader.glsl">
+      <Filter>Shaders\Geometry Shader</Filter>
+    </None>
+    <None Include="PyramidVertexShader.glsl">
+      <Filter>Shaders\Vertex Shader</Filter>
+    </None>
+    <None Include="RectVertexShader.glsl">
+      <Filter>Shaders\Vertex Shader</Filter>
     </None>
   </ItemGroup>
 </Project>
