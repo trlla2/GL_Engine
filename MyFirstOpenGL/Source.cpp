@@ -270,6 +270,33 @@ GLuint CreateProgram(const ShaderProgram& shaders) {
 	}
 }
 
+void RenderGameObject(GameObject obj, GLuint vao ,int programIndex) {
+	//Indicar a la tarjeta GPU que programa debe usar
+	glUseProgram(compiledPrograms[programIndex]);
+
+	glm::mat4 translationMatrix = GenerateTranslationMatrix(obj.position);
+	glm::mat4 rotationMatrix = glm::mat4(1.0f);
+	if (glm::length(obj.rotation) > 0.0001f) {
+		rotationMatrix = GenerateRotationMatrix(obj.rotation, glm::length(obj.rotation));
+	}
+	glm::mat4 scaleMatrix = GenerateScaleMatrix(obj.scale);
+
+	//Pasamos las variables al shader
+	glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[programIndex], "translationMatrix"), 1, GL_FALSE, glm::value_ptr(translationMatrix));
+	glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[programIndex], "rotationMatrix"), 1, GL_FALSE, glm::value_ptr(rotationMatrix));
+	glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[programIndex], "scaleMatrix"), 1, GL_FALSE, glm::value_ptr(scaleMatrix));
+
+	//Definimos que queremos usar el VAO con los puntos
+	glBindVertexArray(vao);
+
+	//Definimos que queremos dibujar
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
+
+	//Dejamos de usar el VAO indicado anteriormente
+	glBindVertexArray(0);
+}
+
+
 void main() {
 
 	//Definir semillas del rand seg�n el tiempo
@@ -491,6 +518,16 @@ void main() {
 
 		const float sinWidth = 0.7f;
 
+		float lastkeyPressTime = 0.f;
+		const float delayBetweenKeyPresses = 0.2f; // 200 ms delay
+
+		// Input variables
+		bool showWireframe = false;
+
+		bool showCube = true;
+		bool showRect = true;
+		bool showPyramid = true;
+
 		//Generamos el game loop
 		while (!glfwWindowShouldClose(window)) {
 
@@ -498,6 +535,38 @@ void main() {
 			glfwPollEvents();
 
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+
+			//INPUT 
+			if (lastkeyPressTime < static_cast<float>(glfwGetTime()) + delayBetweenKeyPresses)
+			{
+				if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
+				{
+					showWireframe = !showWireframe;
+					glPolygonMode(GL_FRONT_AND_BACK, showWireframe ? GL_LINE : GL_FILL);
+					lastkeyPressTime = static_cast<float>(glfwGetTime());
+				}
+
+				if(glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
+				{
+					showCube = !showCube;
+					lastkeyPressTime = static_cast<float>(glfwGetTime());
+				}
+
+				if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
+				{
+					showRect = !showRect;
+					lastkeyPressTime = static_cast<float>(glfwGetTime());
+				}
+
+				if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)
+				{
+					showPyramid = !showPyramid;
+					lastkeyPressTime = static_cast<float>(glfwGetTime());
+				}
+			}
+
+
 
 			//Codigo generao con Claude 4.5, 
 			//Prompt: add a a timer counter, we will count the deltatime between frames and add it to a global time variable
@@ -512,80 +581,26 @@ void main() {
 			//Rotar en Y indefinidamente
 			cube.rotation.y += 5.f * deltaTime;
 
-			//Genero matrices de transformacion (cubo)
-			glm::mat4 translationMatrix = GenerateTranslationMatrix(cube.position);
-			glm::mat4 rotationMatrix = glm::mat4(1.0f);
-			if (glm::length(cube.rotation) > 0.0001f) {
-				rotationMatrix = GenerateRotationMatrix(cube.rotation, glm::length(cube.rotation));
-			}
-			glm::mat4 scaleMatrix = GenerateScaleMatrix(cube.scale);
+			if(showCube)
+				RenderGameObject(cube, cubeVao, 1);
 
 			
-
-			//Pasamos las variables al shader
-			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "translationMatrix"), 1, GL_FALSE, glm::value_ptr(translationMatrix));
-			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "rotationMatrix"), 1, GL_FALSE, glm::value_ptr(rotationMatrix));
-			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "scaleMatrix"), 1, GL_FALSE, glm::value_ptr(scaleMatrix));
-
-			
-
-			//Definimos que queremos usar el VAO con los puntos
-			glBindVertexArray(cubeVao);
-
-			//Definimos que queremos dibujar
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
-
-			//Dejamos de usar el VAO indicado anteriormente
-			glBindVertexArray(0);
-
-
-			//Indicar a la tarjeta GPU que programa debe usar
-			glUseProgram(compiledPrograms[1]);
 			// Orthohedron (long cube)
 
 			rect.position = glm::vec3(0.f, 0.f, 0.f);
 			rect.rotation = glm::vec3(0.f, 0.f, 0.f);
 			rect.scale = glm::vec3(0.5f, 0.75f, 0.5f);
 
-			glm::mat4 rectTraslation = GenerateTranslationMatrix(rect.position);
-			glm::mat4 rectRotation = glm::mat4(1.0f);
-			if (glm::length(rect.rotation) > 0.0001f) {
-				rectRotation = GenerateRotationMatrix(rect.rotation, glm::length(rect.rotation));
-			}
-			glm::mat4 rectScale = GenerateScaleMatrix(rect.scale);
+			if(showRect)
+				RenderGameObject(rect, rectVao, 1);
 
-			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[1], "translationMatrix"), 1, GL_FALSE, glm::value_ptr(rectTraslation));
-			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[1], "rotationMatrix"), 1, GL_FALSE, glm::value_ptr(rectRotation));
-			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[1], "scaleMatrix"), 1, GL_FALSE, glm::value_ptr(rectScale));
 
-			
+			pyramid.position = glm::vec3(0.65f, 0.f, 0.f);
+			pyramid.rotation = glm::vec3(270.f, 0.f, 0.f);
+			pyramid.scale = glm::vec3(1.f, 1.f, 1.75f);
 
-			glBindVertexArray(cubeVao);
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
-			glBindVertexArray(0);
-
-			//Indicar a la tarjeta GPU que programa debe usar
-			glUseProgram(compiledPrograms[2]);
-
-			// pyramid
-			pyramid.position = glm::vec3(0.65f, 0.f, 0.0f);
-			pyramid.rotation = glm::vec3(-90.f, 0.f, 0.f);
-			pyramid.scale = glm::vec3(0.75f, .75f, 1.5f);
-
-			glm::mat4 pyramidTranslation = GenerateTranslationMatrix(pyramid.position);
-			glm::mat4 pyramidRotation = glm::mat4(1.0f);
-			if (glm::length(pyramid.rotation) > 0.0001f) {
-				pyramidRotation = GenerateRotationMatrix(pyramid.rotation, glm::length(pyramid.rotation));
-			}
-			glm::mat4 pyramidScale = GenerateScaleMatrix(pyramid.scale);
-
-			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[2], "translationMatrix"), 1, GL_FALSE, glm::value_ptr(pyramidTranslation));
-			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[2], "rotationMatrix"), 1, GL_FALSE, glm::value_ptr(pyramidRotation));
-			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[2], "scaleMatrix"), 1, GL_FALSE, glm::value_ptr(pyramidScale));
-
-			glBindVertexArray(vaoPiramide);
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, 18);
-			glBindVertexArray(0);
+			if(showPyramid)
+				RenderGameObject(pyramid, vaoPiramide, 2);
 
 			//Cambiamos buffers
 			glFlush();
