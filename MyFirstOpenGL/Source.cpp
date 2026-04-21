@@ -15,6 +15,7 @@ std::vector<GLuint> compiledPrograms;
 
 //Timer
 float globalTime = 0.0f;
+float scaleTime = 1.0f;
 float lastFrameTime = 0.0f;
 float deltaTime = 0.0f;
 
@@ -548,7 +549,7 @@ void main() {
 
 
 			//INPUT 
-			if (lastkeyPressTime < static_cast<float>(glfwGetTime()) + delayBetweenKeyPresses)
+			if (lastkeyPressTime + delayBetweenKeyPresses < static_cast<float>(glfwGetTime()) )
 			{
 				if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
 				{
@@ -574,6 +575,27 @@ void main() {
 					showPyramid = !showPyramid;
 					lastkeyPressTime = static_cast<float>(glfwGetTime());
 				}
+
+				if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+				{
+					if(scaleTime != 0.f)
+						scaleTime = 0.f;
+					else
+						scaleTime = 1.f;
+					lastkeyPressTime = static_cast<float>(glfwGetTime());
+				}
+
+				if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)
+				{
+					scaleTime += 0.1f;
+					lastkeyPressTime = static_cast<float>(glfwGetTime());
+				}
+
+				if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS)
+				{
+					scaleTime -= 0.1f;
+					lastkeyPressTime = static_cast<float>(glfwGetTime());
+				}
 			}
 
 
@@ -581,7 +603,7 @@ void main() {
 			//Codigo generao con Claude 4.5, 
 			//Prompt: add a a timer counter, we will count the deltatime between frames and add it to a global time variable
 			float currentFrameTime = static_cast<float>(glfwGetTime());
-			deltaTime = currentFrameTime - lastFrameTime;
+			deltaTime = (currentFrameTime - lastFrameTime) * scaleTime;
 			lastFrameTime = currentFrameTime;
 			globalTime += deltaTime;
 
