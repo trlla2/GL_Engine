@@ -474,7 +474,6 @@ void main() {
 
 		//Indicar a la tarjeta GPU que programa debe usar
 		glUseProgram(compiledPrograms[0]);
-
 		//Asignar valores iniciales al programa
 		glUniform2f(glGetUniformLocation(compiledPrograms[0], "windowSize"), WINDOW_WIDTH, WINDOW_HEIGHT);
 
@@ -520,7 +519,9 @@ void main() {
 			}
 			glm::mat4 scaleMatrix = GenerateScaleMatrix(cube.scale);
 
-			
+
+			//Indicar a la tarjeta GPU que programa debe usar
+			glUseProgram(compiledPrograms[0]);
 
 			//Pasamos las variables al shader
 			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "translationMatrix"), 1, GL_FALSE, glm::value_ptr(translationMatrix));
