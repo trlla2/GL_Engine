@@ -271,7 +271,7 @@ GLuint CreateProgram(const ShaderProgram& shaders) {
 	}
 }
 
-void RenderGameObject(GameObject obj, GLuint vao ,int programIndex) {
+void RenderGameObject(GameObject obj, GLuint vao ,int programIndex, int vertexPoints = 14) {
 	//Indicar a la tarjeta GPU que programa debe usar
 	glUseProgram(compiledPrograms[programIndex]);
 
@@ -282,6 +282,14 @@ void RenderGameObject(GameObject obj, GLuint vao ,int programIndex) {
 	}
 	glm::mat4 scaleMatrix = GenerateScaleMatrix(obj.scale);
 
+	if (programIndex == 2)
+	{
+		//Solo pirmaide
+		int colorId = 0;
+		colorId = (int)(globalTime * 0.5) % 3; // Cambia el color cada 2 segundos entre 3 colores
+		glUniform1i(glGetUniformLocation(compiledPrograms[2], "colorId"), colorId);
+	}
+
 	//Pasamos las variables al shader
 	glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[programIndex], "translationMatrix"), 1, GL_FALSE, glm::value_ptr(translationMatrix));
 	glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[programIndex], "rotationMatrix"), 1, GL_FALSE, glm::value_ptr(rotationMatrix));
@@ -291,7 +299,7 @@ void RenderGameObject(GameObject obj, GLuint vao ,int programIndex) {
 	glBindVertexArray(vao);
 
 	//Definimos que queremos dibujar
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, vertexPoints);
 
 	//Dejamos de usar el VAO indicado anteriormente
 	glBindVertexArray(0);
@@ -519,15 +527,23 @@ void main() {
 		const float sinWidth = 0.7f;
 		const float cubeRotaionSpeed = 10.f;
 
-
 		//Defino la transform inical del gameobject (ortodero)
 		rect.position = glm::vec3(0.f, 0.f, 0.f);
 		rect.rotation = glm::vec3(80.f, 0.f, 0.f); //cooler looking starting angle
 		rect.scale = glm::vec3(0.5f, 0.5f, 0.5f);
 
+
 		const float rectTargetScale = 1.f;
 		const float rectRotationSpeed = 20.f;
 		bool isExpanding = true;
+
+		//Defino la transform inical del gameobject (piramide)
+		pyramid.position = glm::vec3(0.65f, 0.f, 0.f);
+		pyramid.rotation = glm::vec3(270.f, 0.f, 0.f);
+		pyramid.scale = glm::vec3(1.f, 1.f, 1.75f);
+
+		const float sinWidthPyramid = 0.5f;
+		const float pyramidRotationSpeed = 35.f;
 
 		float lastkeyPressTime = 0.f;
 		const float delayBetweenKeyPresses = 0.2f; // 200 ms delay
@@ -651,12 +667,15 @@ void main() {
 				RenderGameObject(rect, rectVao, 1);
 
 
-			pyramid.position = glm::vec3(0.65f, 0.f, 0.f);
-			pyramid.rotation = glm::vec3(270.f, 0.f, 0.f);
-			pyramid.scale = glm::vec3(1.f, 1.f, 1.75f);
+			//Mover el cubo segun el tiempo
+			pyramid.position.y = sin(globalTime) * sinWidthPyramid;
+
+			//Rotar en X e Y indefinidamente
+			pyramid.rotation.y += pyramidRotationSpeed * deltaTime;
+			pyramid.rotation.x += pyramidRotationSpeed * deltaTime;
 
 			if(showPyramid)
-				RenderGameObject(pyramid, vaoPiramide, 2);
+				RenderGameObject(pyramid, vaoPiramide, 2, 18);
 
 			//Cambiamos buffers
 			glFlush();
