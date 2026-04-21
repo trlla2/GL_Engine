@@ -484,11 +484,22 @@ void main() {
 		glUniform2f(glGetUniformLocation(compiledPrograms[2], "windowSize"), WINDOW_WIDTH, WINDOW_HEIGHT);
 
 		//Defino la transform inical del gameobject (cubo)
-		cube.position = glm::vec3(-0.5f, 0.f, 0.f);
+		cube.position = glm::vec3(-0.6f, 0.f, 0.f);
 		cube.rotation = glm::vec3(60.f, 0.f, 0.f); //cooler looking starting angle
 		cube.scale = glm::vec3(0.5f, 0.5f, 0.5f);
 
 		const float sinWidth = 0.7f;
+		const float cubeRotaionSpeed = 10.f;
+
+
+		//Defino la transform inical del gameobject (ortodero)
+		rect.position = glm::vec3(0.f, 0.f, 0.f);
+		rect.rotation = glm::vec3(80.f, 0.f, 0.f); //cooler looking starting angle
+		rect.scale = glm::vec3(0.5f, 0.5f, 0.5f);
+
+		const float rectTargetScale = 1.f;
+		const float rectRotationSpeed = 20.f;
+		bool isExpanding = true;
 
 		//Generamos el game loop
 		while (!glfwWindowShouldClose(window)) {
@@ -509,7 +520,7 @@ void main() {
 			cube.position.y = sin(globalTime) * sinWidth;
 
 			//Rotar en Y indefinidamente
-			cube.rotation.y += 5.f * deltaTime;
+			cube.rotation.y += cubeRotaionSpeed * deltaTime;
 
 			//Genero matrices de transformacion (cubo)
 			glm::mat4 translationMatrix = GenerateTranslationMatrix(cube.position);
@@ -542,11 +553,22 @@ void main() {
 
 			//Indicar a la tarjeta GPU que programa debe usar
 			glUseProgram(compiledPrograms[1]);
-			// Orthohedron (long cube)
 
-			rect.position = glm::vec3(0.f, 0.f, 0.f);
-			rect.rotation = glm::vec3(0.f, 0.f, 0.f);
-			rect.scale = glm::vec3(0.5f, 0.75f, 0.5f);
+			//rota z indefinidamente
+			rect.rotation.z += rectRotationSpeed * deltaTime;
+
+			//A ojo podemos observar que estos valores son acceptables para lo que queremos vislauizar
+			//basados en pura intuición, el cub se expanidirá y contraerá cada 3 segundos
+			isExpanding = (int)globalTime % 6 < 3;
+
+			if (isExpanding)
+			{
+				rect.scale += glm::vec3(0.5f, 0.0f, -0.5f) * deltaTime; // Escala de crecimiento menos en y para que escale como ortoedro que es 
+			}
+			else
+			{
+				rect.scale -= glm::vec3(0.5f, 0.0f, -0.5f) * deltaTime; // Escala de decrecimiento menos en y para que escale como ortoedro que es 
+			}
 
 			glm::mat4 rectTraslation = GenerateTranslationMatrix(rect.position);
 			glm::mat4 rectRotation = glm::mat4(1.0f);
