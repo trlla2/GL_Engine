@@ -302,7 +302,7 @@ void main() {
 
 		//Declarar instancia de GameObject
 		GameObject cube;
-
+		GameObject pyramid;
 		
 
 		//Compilar shaders
@@ -332,7 +332,7 @@ void main() {
 		glBindBuffer(GL_ARRAY_BUFFER, vboPuntos);
 
 		//Posición X e Y del punto
-		GLfloat punto[] = {
+		GLfloat cubeVertices[] = {
 			-0.5f, +0.5f, -0.5f, // 3
 			+0.5f, +0.5f, -0.5f, // 2
 			-0.5f, -0.5f, -0.5f, // 6
@@ -353,7 +353,7 @@ void main() {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 		//Ponemos los valores en el VBO creado
-		glBufferData(GL_ARRAY_BUFFER, sizeof(punto), punto, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), cubeVertices, GL_STATIC_DRAW);
 
 		//Indicamos donde almacenar y como esta distribuida la información
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
@@ -366,6 +366,38 @@ void main() {
 
 		//Desvinculamos VAO
 		glBindVertexArray(0);
+
+		// Piramide 
+		GLuint vaoPiramide, vboPiramide;
+		glGenVertexArrays(1, &vaoPiramide);
+		glBindVertexArray(vaoPiramide);
+
+		glGenBuffers(1, &vboPiramide);
+		glBindBuffer(GL_ARRAY_BUFFER, vboPiramide);
+
+		GLfloat pyramidVertices[] = {
+			-0.3f, -0.3f, 0.0f,  
+			+0.3f, -0.3f, 0.0f,  
+			+0.3f, +0.3f, 0.0f,   
+			-0.3f, +0.3f, 0.0f,  
+			-0.3f, -0.3f, 0.0f,   
+			+0.0f, +0.0f, +0.5f,  
+			+0.3f, -0.3f, 0.0f,   
+			+0.3f, +0.3f, 0.0f,  
+			+0.0f, +0.0f, +0.5f,  
+			-0.3f, +0.3f, 0.0f,   
+			-0.3f, -0.3f, 0.0f,   
+			+0.0f, +0.0f, +0.5f   
+		};
+
+		glBufferData(GL_ARRAY_BUFFER, sizeof(pyramidVertices), pyramidVertices, GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+		glEnableVertexAttribArray(0);
+
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+
 
 		//Indicar a la tarjeta GPU que programa debe usar
 		glUseProgram(compiledPrograms[0]);
@@ -389,7 +421,7 @@ void main() {
 			//Genero matrices de transformacion
 			glm::mat4 translationMatrix = GenerateTranslationMatrix(cube.position);
 			glm::mat4 rotationMatrix = glm::mat4(1.0f);
-			if (glm::length(cube.rotation) > 0.0001f) { // Solo calcula si hay rotación significativa
+			if (glm::length(cube.rotation) > 0.0001f) { 
 				rotationMatrix = GenerateRotationMatrix(cube.rotation, glm::length(cube.rotation));
 			}
 			glm::mat4 scaleMatrix = GenerateScaleMatrix(cube.scale);
@@ -409,6 +441,26 @@ void main() {
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
 
 			//Dejamos de usar el VAO indicado anteriormente
+			glBindVertexArray(0);
+
+			// pyramid
+			pyramid.position = glm::vec3(0.5f, 0.5f, 0.0f);
+			pyramid.rotation = glm::vec3(271.f, 0.f, 0.f);
+			pyramid.scale = glm::vec3(0.5f, 0.5f, 0.5f);
+
+			glm::mat4 pyramidTranslation = GenerateTranslationMatrix(pyramid.position);
+			glm::mat4 pyramidRotation = glm::mat4(1.0f);
+			if (glm::length(pyramid.rotation) > 0.0001f) {
+				pyramidRotation = GenerateRotationMatrix(pyramid.rotation, glm::length(pyramid.rotation));
+			}
+			glm::mat4 pyramidScale = GenerateScaleMatrix(pyramid.scale);
+
+			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "translationMatrix"), 1, GL_FALSE, glm::value_ptr(pyramidTranslation));
+			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "rotationMatrix"), 1, GL_FALSE, glm::value_ptr(pyramidRotation));
+			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "scaleMatrix"), 1, GL_FALSE, glm::value_ptr(pyramidScale));
+
+			glBindVertexArray(vaoPiramide);
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 12);
 			glBindVertexArray(0);
 
 			//Cambiamos buffers
