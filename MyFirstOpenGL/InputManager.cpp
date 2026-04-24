@@ -14,27 +14,12 @@ bool InputManager::Listen()
 		return false;
 	}
 
-	for (std::unordered_map<int, KeyState>::iterator it = keyReference.begin(); it != keyReference.end(); it++)
+	for (int i = 32; i <= GLFW_KEY_LAST; i++)
 	{
-		int key = it->first;
-		int state = glfwGetKey(currentWindow, key);
-		KeyState& keyState = keyReference[key];
-
-		if (state == GLFW_PRESS)
-		{
-			if (keyState == EMPTY || keyState == UP || keyState == RELEASED)
-				keyState = DOWN;
-			else if (keyState == DOWN || keyState == HOLD)
-				keyState = HOLD;
-		}
-		else if (state == GLFW_RELEASE)
-		{
-			if (keyState == DOWN || keyState == HOLD)
-				keyState = UP;
-			else if (keyState == UP || keyState == RELEASED)
-				keyState = RELEASED;
-		}
+		previousKeys[i] = currentKeys[i];
+		currentKeys[i] = glfwGetKey(currentWindow, i) == GLFW_PRESS;
 	}
+
 	return true;
 }
 
@@ -51,5 +36,13 @@ bool InputManager::GetEventKey(int key, KeyState event)
 		return false;
 	}
 
-	return glfwGetKey(currentWindow, key) == event;
+	bool isCurrentDown = currentKeys[key];
+	bool isPreviousDown = previousKeys[key];
+
+	if (event == DOWN) return isCurrentDown && !isPreviousDown;
+	if (event == HOLD) return isCurrentDown && isPreviousDown;
+	if (event == UP) return !isCurrentDown && isPreviousDown;
+	if (event == RELEASED) return !isCurrentDown && !isPreviousDown;
+
+	return false;
 }
