@@ -1,11 +1,9 @@
 #include "Renderer.h"
-#include "Mesh.h"
-#include "GameObjects.h"
 #include <GL/glew.h>
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
-
+#include "TimeManager.h"
 
 // Funciones auxiliares de matrices
 glm::mat4 GenerateTranslationMatrix(glm::vec3 translation) {

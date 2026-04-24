@@ -9,8 +9,6 @@
 #include "InputManager.h"
 #include "TimeManager.h"
 #include "ShaderProgram.h"
-#include "GameObjects.h"
-#include "Mesh.h"
 #include "Renderer.h"
 
 #define WINDOW_WIDTH 640
@@ -133,7 +131,8 @@ void main()
 		// Activamos el Input Manager con la ventana 
 		IM->Init(window);
 
-		while (!glfwWindowShouldClose(window)) {
+		while (!glfwWindowShouldClose(window))
+		{
 
 			//Pulleamos los eventos (botones, teclas, mouse...)
 			glfwPollEvents();
@@ -193,10 +192,10 @@ void main()
 			cube->transform.position.y = sin(TM->GetGlobalTime()) * sinWidth;
 
 			//Rotar en Y indefinidamente
-			cube->transform.rotation.y += cube->rotationSpeed* TM->GetDeltaTime();
+			cube->transform.rotation.y += cube->rotationSpeed * TM->GetDeltaTime();
 
 			if (showCube)
-				renderer.RenderObject(*cube, *cubeMesh, compiledPrograms[0]);
+				renderer.RenderObject(*cube, *cubeMesh, compiledPrograms[0], 14);
 
 
 			//Indicar a la tarjeta GPU que programa debe usar
@@ -205,54 +204,35 @@ void main()
 			//rota z indefinidamente
 			rect->transform.rotation.z += rectRotationSpeed * TM->GetDeltaTime();
 
-			//A ojo podemos observar que estos valores son acceptables para lo que queremos vislauizar
-			//basados en pura intuición, el cub se expanidirá y contraerá cada 3 segundos
+			//Expandir/contraer cada 3 segundos
 			isExpanding = (int)TM->GetGlobalTime() % 6 < 3;
 
-			if (isExpanding)
-			{
-				rect->transform.scale += glm::vec3(0.3f, 0.0f, -0.4f) * TM->GetDeltaTime(); // Escala de crecimiento menos en y para que escale como ortoedro que es 
-			}
-			else
-			{
+			if (isExpanding) {
+				rect->transform.scale += glm::vec3(0.3f, 0.0f, -0.4f) * TM->GetDeltaTime();
+			} else {
 				rect->transform.scale -= glm::vec3(0.3f, 0.0f, -0.4f) * TM->GetDeltaTime();
-
-				// Actualizar y renderizar rect
-				if (showRect)
-				{
-					rect->transform.rotation.z += rectRotationSpeed * TM->GetDeltaTime();
-
-					// Expandir/contraer cada 3 segundos
-					isExpanding = (int)TM->GetGlobalTime() % 6 < 3;
-					if (isExpanding)
-					{
-						rect->transform.scale += glm::vec3(0.3f, 0.0f, -0.4f) * TM->GetDeltaTime();
-					}
-					else
-					{
-						rect->transform.scale -= glm::vec3(0.3f, 0.0f, -0.4f) * TM->GetDeltaTime();
-					}
-					// Actualizar y renderizar piramide
-					if (showPyramid)
-					{
-						pyramid->transform.position.y = sin(TM->GetGlobalTime()) * sinWidthPyramid;
-						pyramid->transform.rotation.y += pyramidRotationSpeed * TM->GetDeltaTime();
-						pyramid->transform.rotation.x += pyramidRotationSpeed * TM->GetDeltaTime();
-						renderer.RenderPyramid(*pyramid, *pyramidMesh, compiledPrograms[2], 18);
-					}
-
-					//Cambiamos buffers
-					glFlush();
-					glfwSwapBuffers(window);
-				}
-
-				//Desactivar y eliminar programa
-				glUseProgram(0);
-				glDeleteProgram(compiledPrograms[0]);
-
 			}
+
+			if (showRect)
+				renderer.RenderObject(*rect, *rectMesh, compiledPrograms[1], 14);
+
+
+			pyramid->transform.position.y = sin(TM->GetGlobalTime()) * sinWidthPyramid;
+			pyramid->transform.rotation.y += pyramidRotationSpeed * TM->GetDeltaTime();
+			pyramid->transform.rotation.x += pyramidRotationSpeed * TM->GetDeltaTime();
+
+			if (showPyramid)
+				renderer.RenderPyramid(*pyramid, *pyramidMesh, compiledPrograms[2], 18);
+
+
+			//Cambiamos buffers
+			glFlush();
+			glfwSwapBuffers(window);
 		}
-		else
+
+	}
+		
+else
 		{
 			std::cout << "Ha petao." << std::endl;
 			glfwTerminate();

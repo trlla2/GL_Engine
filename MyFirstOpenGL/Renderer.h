@@ -1,5 +1,6 @@
 #include <GL/glew.h>
-
+#include "Mesh.h"
+#include "GameObjects.h"
 #pragma once
 class Renderer {
 public:

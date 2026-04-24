@@ -1,7 +1,6 @@
 #include <GL/glew.h>
 #include <glm.hpp>
 #include "Mesh.h"
-#include "Renderer.h"
 #include "ShaderProgram.h"
 
 class Transform {
@@ -17,8 +16,6 @@ public:
 	Transform transform;
 
 	GameObject() = default;
-
-	void Render(Renderer& renderer) {};
 };
 
 class Camera {

@@ -19,7 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="FileLoader.cpp" />
     <ClCompile Include="InputManager.cpp" />
+    <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="ShaderLoaders.cpp" />
+    <ClCompile Include="ShaderProgram.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="TimeManager.cpp" />
   </ItemGroup>
@@ -35,7 +40,13 @@
     <None Include="RectVertexShader.glsl" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="FileLoader.h" />
+    <ClInclude Include="GameObjects.h" />
     <ClInclude Include="InputManager.h" />
+    <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Renderer.h" />
+    <ClInclude Include="ShaderLoaders.h" />
+    <ClInclude Include="ShaderProgram.h" />
     <ClInclude Include="TimeManager.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
