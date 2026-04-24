@@ -7,6 +7,7 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include "InputManager.h"
 
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
@@ -545,9 +546,6 @@ void main() {
 		const float sinWidthPyramid = 0.5f;
 		const float pyramidRotationSpeed = 35.f;
 
-		float lastkeyPressTime = 0.f;
-		const float delayBetweenKeyPresses = 0.2f; // 200 ms delay
-
 		// Input variables
 		bool showWireframe = false;
 
@@ -556,62 +554,59 @@ void main() {
 		bool showPyramid = true;
 
 		//Generamos el game loop
+
+		// Activamos el Input Manager con la ventana 
+		IM->Init(window);
+		
 		while (!glfwWindowShouldClose(window)) {
 
 			//Pulleamos los eventos (botones, teclas, mouse...)
 			glfwPollEvents();
 
+			// Updateamos el Input Manager
+			IM->Listen();
+
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 
 			//INPUT 
-			if (lastkeyPressTime + delayBetweenKeyPresses < static_cast<float>(glfwGetTime()) )
+			if (IM->GetEventKey( GLFW_KEY_1, KeyState::DOWN))
 			{
-				if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
-				{
-					showWireframe = !showWireframe;
-					glPolygonMode(GL_FRONT_AND_BACK, showWireframe ? GL_LINE : GL_FILL);
-					lastkeyPressTime = static_cast<float>(glfwGetTime());
-				}
+				showWireframe = !showWireframe;
+				glPolygonMode(GL_FRONT_AND_BACK, showWireframe ? GL_LINE : GL_FILL);
+			}
 
-				if(glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
-				{
-					showCube = !showCube;
-					lastkeyPressTime = static_cast<float>(glfwGetTime());
-				}
+			if(IM->GetEventKey(GLFW_KEY_2, KeyState::DOWN))
+			{
+				showCube = !showCube;
+			}
 
-				if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
-				{
-					showRect = !showRect;
-					lastkeyPressTime = static_cast<float>(glfwGetTime());
-				}
+			if (IM->GetEventKey(GLFW_KEY_3, KeyState::DOWN))
+			{
+				showRect = !showRect;
+			}
 
-				if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)
-				{
-					showPyramid = !showPyramid;
-					lastkeyPressTime = static_cast<float>(glfwGetTime());
-				}
+			if (IM->GetEventKey(GLFW_KEY_4, KeyState::DOWN))
+			{
+				showPyramid = !showPyramid;
+			}
 
-				if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-				{
-					if(scaleTime != 0.f)
-						scaleTime = 0.f;
-					else
-						scaleTime = 1.f;
-					lastkeyPressTime = static_cast<float>(glfwGetTime());
-				}
+			if (IM->GetEventKey(GLFW_KEY_SPACE, KeyState::DOWN))
+			{
+				if(scaleTime != 0.f)
+					scaleTime = 0.f;
+				else
+					scaleTime = 1.f;
+			}
 
-				if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)
-				{
-					scaleTime += 0.1f;
-					lastkeyPressTime = static_cast<float>(glfwGetTime());
-				}
+			if (IM->GetEventKey(GLFW_KEY_M, KeyState::DOWN))
+			{
+				scaleTime += 0.1f;
+			}
 
-				if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS)
-				{
-					scaleTime -= 0.1f;
-					lastkeyPressTime = static_cast<float>(glfwGetTime());
-				}
+			if (IM->GetEventKey(GLFW_KEY_N, KeyState::DOWN))
+			{
+				scaleTime -= 0.1f;
 			}
 
 
