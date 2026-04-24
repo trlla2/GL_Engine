@@ -28,6 +28,7 @@ public:
 
 class Cube : public GameObject
 {
+public:
 	GLfloat vertices[42] = {
 		-0.5f, 0.5f, -0.5f, // 3
 		+0.5f, +0.5f, -0.5f, // 2
@@ -44,11 +45,12 @@ class Cube : public GameObject
 		-0.5f, +0.5f, +0.5f  // 1
 	};
 
-	public: Cube() : GameObject() {}
+	Cube() : GameObject() {}
 };
 
 class Pyramid : public GameObject
 {
+public:
 	GLfloat vertices[42] = {
 		-0.5f, 0.5f, -0.5f, // 3
 		+0.5f, +0.5f, -0.5f, // 2
@@ -68,6 +70,7 @@ class Pyramid : public GameObject
 
 class Rect : public GameObject
 {
+public:
 	GLfloat vertices [54] = { // He utilizado la ia (claude Haiku 4.5) Prompt (con contexto del codigo): Hazme los puntos de una priramide 3d de forma que la pueda dibujar con un solo glDrawArray
 			0.3f, -0.3f, 0.0f,
 			0.0f,  0.0f, 0.5f,

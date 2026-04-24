@@ -64,8 +64,8 @@ void main() {
 	//Indicamos lado del culling
 	glCullFace(GL_BACK);
 
-	//Inicializamos GLEW y controlamos errores
-	if (glewInit() == GLEW_OK) {
+	if (glewInit() == GLEW_OK) 
+	{
 
 		//Declarar instancia de GameObject
 		Cube* cube = new Cube();
@@ -81,71 +81,10 @@ void main() {
 		compiledPrograms.push_back(rectProgram->programId);
 		compiledPrograms.push_back(pyramidProgram->programId);
 
-		//Definir vertices para cada geometria
-		GLfloat cubeVertices[] = {
-			-0.5f, +0.5f, -0.5f, // 3
-			+0.5f, +0.5f, -0.5f, // 2
-			-0.5f, -0.5f, -0.5f, // 6
-			+0.5f, -0.5f, -0.5f, // 7
-			+0.5f, -0.5f, +0.5f, // 4
-			+0.5f, +0.5f, -0.5f, // 2
-			+0.5f, +0.5f, +0.5f, // 0
-			-0.5f, +0.5f, -0.5f, // 3
-			-0.5f, +0.5f, +0.5f, // 1
-			-0.5f, -0.5f, -0.5f, // 6
-			-0.5f, -0.5f, +0.5f, // 5
-			+0.5f, -0.5f, +0.5f, // 4
-			-0.5f, +0.5f, +0.5f, // 1
-			+0.5f, +0.5f, +0.5f  // 0
-		};
-
-		GLfloat rectVertices[] = {
-			-0.5f, +0.5f, -0.5f, // 3
-			+0.5f, +0.5f, -0.5f, // 2
-			-0.5f, -0.5f, -0.5f, // 6
-			+0.5f, -0.5f, -0.5f, // 7
-			+0.5f, -0.5f, +0.5f, // 4
-			+0.5f, +0.5f, -0.5f, // 2
-			+0.5f, +0.5f, +0.5f, // 0
-			-0.5f, +0.5f, -0.5f, // 3
-			-0.5f, +0.5f, +0.5f, // 1
-			-0.5f, -0.5f, -0.5f, // 6
-			-0.5f, -0.5f, +0.5f, // 5
-			+0.5f, -0.5f, +0.5f, // 4
-			-0.5f, +0.5f, +0.5f, // 1
-			+0.5f, +0.5f, +0.5f  // 0
-		};
-
-		GLfloat pyramidVertices[] = {
-			0.3f, -0.3f, 0.0f,
-			0.0f,  0.0f, 0.5f,
-			-0.3f, -0.3f, 0.0f,
-
-			0.3f,  0.3f, 0.0f,
-			0.0f,  0.0f, 0.5f,
-			0.3f, -0.3f, 0.0f,
-
-			-0.3f,  0.3f, 0.0f,
-			0.0f,  0.0f, 0.5f,
-			0.3f,  0.3f, 0.0f,
-
-			-0.3f, -0.3f, 0.0f,
-			0.0f,  0.0f, 0.5f,
-			-0.3f,  0.3f, 0.0f,
-
-			-0.3f,  0.3f, 0.0f,
-			-0.3f, -0.3f, 0.0f,
-			0.3f, -0.3f, 0.0f,
-
-			0.3f, -0.3f, 0.0f,
-			0.3f,  0.3f, 0.0f,
-			-0.3f,  0.3f, 0.0f
-		};
-
 		// Crear meshes usando la clase Mesh
-		Mesh* cubeMesh = new Mesh(cubeVertices, sizeof(cubeVertices), 14);
-		Mesh* rectMesh = new Mesh(rectVertices, sizeof(rectVertices), 14);
-		Mesh* pyramidMesh = new Mesh(pyramidVertices, sizeof(pyramidVertices), 18);
+		Mesh* cubeMesh = new Mesh(cube->vertices, sizeof(cube->vertices), 14);
+		Mesh* rectMesh = new Mesh(rect->vertices, sizeof(rect->vertices), 14);
+		Mesh* pyramidMesh = new Mesh(pyramid->vertices, sizeof(pyramid->vertices), 18);
 
 		// Crear renderer
 		Renderer renderer;
