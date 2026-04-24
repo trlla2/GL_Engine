@@ -5,7 +5,6 @@
 #include <gtc/matrix_transform.hpp>
 #include <iostream>
 #include <string>
-#include <fstream>
 #include <vector>
 
 #define WINDOW_WIDTH 640
@@ -26,15 +25,19 @@ public :
 	glm::vec3 position = glm::vec3(0.f);
 	glm::vec3 rotation = glm::vec3(0.f);
 	glm::vec3 scale = glm::vec3(1.f);
-private:
-	GLuint vao = 0;
-	GLuint vbo = 0;
 };
 
 class GameObject {
 
 public:	
 	Transform transform;
+	GameObject(GLuint VAO, GLuint VBO) {
+		vao = VAO;
+		vbo = VBO;
+	}
+private:
+	GLuint vao = 0;
+	GLuint vbo = 0;
 };
 
 class Camera {
@@ -60,19 +63,53 @@ class cube : public GameObject
 		+0.5f, -0.5f, +0.5f, // 4
 		-0.5f, +0.5f, +0.5f  // 1
 	};
+
+	cube(GLuint VAO, GLuint VBO) : GameObject(VAO, VBO) {}
 };
 
-struct ShaderProgram {
-
-	GLuint vertexShader = 0;
-	GLuint geometryShader = 0;
-	GLuint fragmentShader = 0;
+class pyramid : public GameObject
+{
+	GLfloat vertices[42] = {
+		-0.5f, 0.5f, -0.5f, // 3
+		+0.5f, +0.5f, -0.5f, // 2
+		-0.5f, -0.5f, -0.5f, // 6
+		+0.5f, -0.5f, -0.5f, // 7
+		+0.5f, -0.5f, +0.5f, // 4
+		+0.5f, +0.5f, -0.5f, // 2
+		+0.5f, +0.5f, +0.5f, // 0
+		-0.5f, +0.5f, -0.5f, // 3
+		-0.5f, +0.5f, +0.5f, // 1
+		-0.5f, -0.5f, -0.5f, // 6
+		-0.5f, -0.5f, +0.5f, // 5
+		+0.5f, -0.5f, +0.5f  // 4
+	};
+	pyramid(GLuint VAO, GLuint VBO) : GameObject(VAO, VBO) {}
 };
+
+class rect : public GameObject
+{
+	GLfloat vertices[42] = {
+		-0.5f, 0.5f, -0.5f, // 3
+		+0.5f, +0.5f, -0.5f, // 2
+		-0.5f, -0.5f, -0.5f, // 6
+		+0.5f, -0.5f, -0.5f, // 7
+		+0.5f, -0.5f, +0.5f, // 4
+		+0.5f, +0.5f, -0.5f, // 2
+		+0.5f, +0.5f, +0.5f, // 0
+		-0.5f, +0.5f, -0.5f, // 3
+		-0.5f, +0.5f, +0.5f, // 1
+		-0.5f, -0.5f, -0.5f, // 6
+		-0.5f, -0.5f, +0.5f, // 5
+		+0.5f, -0.5f, +0.5f  // 4
+	};
+	rect(GLuint VAO, GLuint VBO) : GameObject(VAO, VBO) {}
+};
+
 
 void Resize_Window(GLFWwindow* window, int iFrameBufferWidth, int iFrameBufferHeight) {
 
 
-	//Definir nuevo tama�o del viewport
+	//Definir nuevo tamano del viewport
 	glViewport(0, 0, iFrameBufferWidth, iFrameBufferHeight);
 	glUniform2f(glGetUniformLocation(compiledPrograms[0], "windowSize"), iFrameBufferWidth, iFrameBufferHeight);
 
@@ -80,7 +117,7 @@ void Resize_Window(GLFWwindow* window, int iFrameBufferWidth, int iFrameBufferHe
 
 //Funcion que genera una matriz de escalado representada por un vector
 glm::mat4 GenerateScaleMatrix(glm::vec3 scaleAxis) {
-
+		
 	return glm::scale(glm::mat4(1.0f), scaleAxis);
 }
 
@@ -96,221 +133,12 @@ glm::mat4 GenerateTranslationMatrix(glm::vec3 translation) {
 	return glm::translate(glm::mat4(1.0f), translation);
 }
 
-//Funcion que devolvera una string con todo el archivo leido
-std::string Load_File(const std::string& filePath) {
-
-	std::ifstream file(filePath);
-
-	std::string fileContent;
-	std::string line;
-
-	//Lanzamos error si el archivo no se ha podido abrir
-	if (!file.is_open()) {
-		std::cerr << "No se ha podido abrir el archivo: " << filePath << std::endl;
-		std::exit(EXIT_FAILURE);
-	}
-
-	//Leemos el contenido y lo volcamos a la variable auxiliar
-	while (std::getline(file, line)) {
-		fileContent += line + "\n";
-	}
-
-	//Cerramos stream de datos y devolvemos contenido
-	file.close();
-
-	return fileContent;
-}
-
-GLuint LoadFragmentShader(const std::string& filePath) {
-
-	// Crear un fragment shader
-	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-
-	//Usamos la funcion creada para leer el fragment shader y almacenarlo 
-	std::string sShaderCode = Load_File(filePath);
-	const char* cShaderSource = sShaderCode.c_str();
-
-	//Vinculamos el fragment shader con su c�digo fuente
-	glShaderSource(fragmentShader, 1, &cShaderSource, nullptr);
-
-	// Compilar el fragment shader
-	glCompileShader(fragmentShader);
-
-	// Verificar errores de compilaci�n
-	GLint success;
-	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-
-	//Si la compilacion ha sido exitosa devolvemos el fragment shader
-	if (success) {
-
-		return fragmentShader;
-
-	}
-	else {
-
-		//Obtenemos longitud del log
-		GLint logLength;
-		glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &logLength);
-
-		//Obtenemos el log
-		std::vector<GLchar> errorLog(logLength);
-		glGetShaderInfoLog(fragmentShader, logLength, nullptr, errorLog.data());
-
-		//Mostramos el log y finalizamos programa
-		std::cerr << "Se ha producido un error al cargar el fragment shader:  " << errorLog.data() << std::endl;
-		std::exit(EXIT_FAILURE);
-	}
-}
-
-
-GLuint LoadGeometryShader(const std::string& filePath) {
-
-	// Crear un vertex shader
-	GLuint geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
-
-	//Usamos la funcion creada para leer el vertex shader y almacenarlo 
-	std::string sShaderCode = Load_File(filePath);
-	const char* cShaderSource = sShaderCode.c_str();
-
-	//Vinculamos el vertex shader con su c�digo fuente
-	glShaderSource(geometryShader, 1, &cShaderSource, nullptr);
-
-	// Compilar el vertex shader
-	glCompileShader(geometryShader);
-
-	// Verificar errores de compilaci�n
-	GLint success;
-	glGetShaderiv(geometryShader, GL_COMPILE_STATUS, &success);
-
-	//Si la compilacion ha sido exitosa devolvemos el vertex shader
-	if (success) {
-
-		return geometryShader;
-
-	}
-	else {
-
-		//Obtenemos longitud del log
-		GLint logLength;
-		glGetShaderiv(geometryShader, GL_INFO_LOG_LENGTH, &logLength);
-
-		//Obtenemos el log
-		std::vector<GLchar> errorLog(logLength);
-		glGetShaderInfoLog(geometryShader, logLength, nullptr, errorLog.data());
-
-		//Mostramos el log y finalizamos programa
-		std::cerr << "Se ha producido un error al cargar el vertex shader:  " << errorLog.data() << std::endl;
-		std::exit(EXIT_FAILURE);
-	}
-}
-
-GLuint LoadVertexShader(const std::string& filePath) {
-
-	// Crear un vertex shader
-	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-
-	//Usamos la funcion creada para leer el vertex shader y almacenarlo 
-	std::string sShaderCode = Load_File(filePath);
-	const char* cShaderSource = sShaderCode.c_str();
-
-	//Vinculamos el vertex shader con su c�digo fuente
-	glShaderSource(vertexShader, 1, &cShaderSource, nullptr);
-
-	// Compilar el vertex shader
-	glCompileShader(vertexShader);
-
-	// Verificar errores de compilaci�n
-	GLint success;
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-
-	//Si la compilacion ha sido exitosa devolvemos el vertex shader
-	if (success) {
-
-		return vertexShader;
-
-	}
-	else {
-
-		//Obtenemos longitud del log
-		GLint logLength;
-		glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &logLength);
-
-		//Obtenemos el log
-		std::vector<GLchar> errorLog(logLength);
-		glGetShaderInfoLog(vertexShader, logLength, nullptr, errorLog.data());
-
-		//Mostramos el log y finalizamos programa
-		std::cerr << "Se ha producido un error al cargar el vertex shader:  " << errorLog.data() << std::endl;
-		std::exit(EXIT_FAILURE);
-	}
-}
-
-//Funci�n que dado un struct que contiene los shaders de un programa generara el programa entero de la GPU
-GLuint CreateProgram(const ShaderProgram& shaders) {
-
-	//Crear programa de la GPU
-	GLuint program = glCreateProgram();
-
-	//Verificar que existe un vertex shader y adjuntarlo al programa
-	if (shaders.vertexShader != 0) {
-		glAttachShader(program, shaders.vertexShader);
-	}
-
-	if (shaders.geometryShader != 0) {
-		glAttachShader(program, shaders.geometryShader);
-	}
-
-	if (shaders.fragmentShader != 0) {
-		glAttachShader(program, shaders.fragmentShader);
-	}
-
-	// Linkear el programa
-	glLinkProgram(program);
-
-	//Obtener estado del programa
-	GLint success;
-	glGetProgramiv(program, GL_LINK_STATUS, &success);
-
-	//Devolver programa si todo es correcto o mostrar log en caso de error
-	if (success) {
-
-		//Liberamos recursos
-		if (shaders.vertexShader != 0) {
-			glDetachShader(program, shaders.vertexShader);
-		}
-
-		//Liberamos recursos
-		if (shaders.geometryShader != 0) {
-			glDetachShader(program, shaders.geometryShader);
-		}
-
-		//Liberamos recursos
-		if (shaders.fragmentShader != 0) {
-			glDetachShader(program, shaders.fragmentShader);
-		}
-
-		return program;
-	}
-	else {
-
-		//Obtenemos longitud del log
-		GLint logLength;
-		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
-
-		//Almacenamos log
-		std::vector<GLchar> errorLog(logLength);
-		glGetProgramInfoLog(program, logLength, nullptr, errorLog.data());
-
-		std::cerr << "Error al linkar el programa:  " << errorLog.data() << std::endl;
-		std::exit(EXIT_FAILURE);
-	}
-}
 
 void RenderGameObject(GameObject obj, GLuint vao ,int programIndex, int vertexPoints = 14) {
 	//Indicar a la tarjeta GPU que programa debe usar
 	glUseProgram(compiledPrograms[programIndex]);
 
-	glm::mat4 translationMatrix = GenerateTranslationMatrix(obj.position);
+	glm::mat4 translationMatrix = MatrixOperations.GenerateTranslationMatrix(obj.position);
 	glm::mat4 rotationMatrix = glm::mat4(1.0f);
 	if (glm::length(obj.rotation) > 0.0001f) {
 		rotationMatrix = GenerateRotationMatrix(obj.rotation, glm::length(obj.rotation));
