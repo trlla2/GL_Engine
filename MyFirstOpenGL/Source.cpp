@@ -19,12 +19,47 @@ float scaleTime = 1.0f;
 float lastFrameTime = 0.0f;
 float deltaTime = 0.0f;
 
-//Struct para controlar el GameObject (cubo)
-struct GameObject {
 
+
+class Transform {
+public :
 	glm::vec3 position = glm::vec3(0.f);
 	glm::vec3 rotation = glm::vec3(0.f);
 	glm::vec3 scale = glm::vec3(1.f);
+private:
+	GLuint vao = 0;
+	GLuint vbo = 0;
+};
+
+class GameObject {
+
+public:	
+	Transform transform;
+};
+
+class Camera {
+	public:
+	glm::vec3 position = glm::vec3(0.f);
+	glm::vec3 rotation = glm::vec3(0.f);
+};
+
+class cube : public GameObject
+{
+	GLfloat vertices[42] = {
+		-0.5f, 0.5f, -0.5f, // 3
+		+0.5f, +0.5f, -0.5f, // 2
+		-0.5f, -0.5f, -0.5f, // 6
+		+0.5f, -0.5f, -0.5f, // 7
+		+0.5f, -0.5f, +0.5f, // 4
+		+0.5f, +0.5f, -0.5f, // 2
+		+0.5f, +0.5f, +0.5f, // 0
+		-0.5f, +0.5f, -0.5f, // 3
+		-0.5f, +0.5f, +0.5f, // 1
+		-0.5f, -0.5f, -0.5f, // 6
+		-0.5f, -0.5f, +0.5f, // 5
+		+0.5f, -0.5f, +0.5f, // 4
+		-0.5f, +0.5f, +0.5f  // 1
+	};
 };
 
 struct ShaderProgram {
@@ -34,8 +69,8 @@ struct ShaderProgram {
 	GLuint fragmentShader = 0;
 };
 
-
 void Resize_Window(GLFWwindow* window, int iFrameBufferWidth, int iFrameBufferHeight) {
+
 
 	//Definir nuevo tama�o del viewport
 	glViewport(0, 0, iFrameBufferWidth, iFrameBufferHeight);
