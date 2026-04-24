@@ -1,7 +1,10 @@
 #pragma once
 #include <GLFW/glfw3.h>
+#include <unordered_map>
 
 #define IM InputManager::GetInstance()
+
+enum KeyState { EMPTY, DOWN, UP, HOLD, RELEASED };
 
 class InputManager
 {
@@ -12,9 +15,13 @@ public:
 		return &instance;
 	}
 
-	void Listen(GLFWwindow* window);
+	void Init(GLFWwindow* window);
 
-	bool GetEventKey(int key, int event);
+	bool Listen();
+
+	bool GetEventKey(int key, KeyState event);
+
+	
 
 private:
 	InputManager() = default;
@@ -24,4 +31,6 @@ private:
 
 
 	GLFWwindow* currentWindow;
+
+	std::unordered_map<int, KeyState> keyReference;
 };
