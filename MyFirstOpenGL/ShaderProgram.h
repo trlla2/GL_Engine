@@ -14,6 +14,11 @@ private:
 	GLuint geometryShader = 0;
 	GLuint fragmentShader = 0;
 
+	GLuint CreateProgram() {}
+
+public:
+	GLuint programId = 0;
+
 	ShaderProgram(std::string vertexFileName, std::string  geometryFileName, std::string fragmentFilename)
 	{
 		vertexShader = vertexShaderLoader.LoadVertexShader("CubeVertexShader.glsl");
@@ -22,8 +27,6 @@ private:
 
 		CreateProgram();
 	}
-
-	GLuint CreateProgram(){}
 };
 
 GLuint ShaderProgram::CreateProgram()
