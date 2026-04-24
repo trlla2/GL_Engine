@@ -8,17 +8,12 @@
 #include <fstream>
 #include <vector>
 #include "InputManager.h"
+#include "TimeManager.h"
 
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
 
 std::vector<GLuint> compiledPrograms;
-
-//Timer
-float globalTime = 0.0f;
-float scaleTime = 1.0f;
-float lastFrameTime = 0.0f;
-float deltaTime = 0.0f;
 
 //Struct para controlar el GameObject (cubo)
 struct GameObject {
@@ -287,7 +282,7 @@ void RenderGameObject(GameObject obj, GLuint vao ,int programIndex, int vertexPo
 	{
 		//Solo pirmaide
 		int colorId = 0;
-		colorId = (int)(globalTime * 0.5) % 3; // Cambia el color cada 2 segundos entre 3 colores
+		colorId = (int)(TM->GetGlobalTime() * 0.5) % 3; // Cambia el color cada 2 segundos entre 3 colores
 		glUniform1i(glGetUniformLocation(compiledPrograms[2], "colorId"), colorId);
 	}
 
@@ -309,8 +304,9 @@ void RenderGameObject(GameObject obj, GLuint vao ,int programIndex, int vertexPo
 
 void main() {
 
-	//Definir semillas del rand seg�n el tiempo
-	srand(static_cast<unsigned int>(time(NULL)));
+	// Inicializar el gestor de tiempo
+	TM->Init();
+	
 
 	//Inicializamos GLFW para gestionar ventanas e inputs
 	glfwInit();
@@ -566,6 +562,11 @@ void main() {
 			// Updateamos el Input Manager
 			IM->Listen();
 
+			// Updateamos el Time Manager
+			TM->Update();
+
+
+
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 
@@ -593,36 +594,30 @@ void main() {
 
 			if (IM->GetEventKey(GLFW_KEY_SPACE, KeyState::DOWN))
 			{
-				if(scaleTime != 0.f)
-					scaleTime = 0.f;
+				if(TM->GetScaleTime() != 0.f)
+					TM->SetScaleTime(0.f);
 				else
-					scaleTime = 1.f;
+					TM->SetScaleTime(1.f);
 			}
 
 			if (IM->GetEventKey(GLFW_KEY_M, KeyState::DOWN))
 			{
-				scaleTime += 0.1f;
+				TM->SetScaleTime(TM->GetScaleTime() + 0.1f);
 			}
 
 			if (IM->GetEventKey(GLFW_KEY_N, KeyState::DOWN))
 			{
-				scaleTime -= 0.1f;
+				TM->SetScaleTime(TM->GetScaleTime() - 0.1f);
 			}
 
 
 
-			//Codigo generao con Claude 4.5, 
-			//Prompt: add a a timer counter, we will count the deltatime between frames and add it to a global time variable
-			float currentFrameTime = static_cast<float>(glfwGetTime());
-			deltaTime = (currentFrameTime - lastFrameTime) * scaleTime;
-			lastFrameTime = currentFrameTime;
-			globalTime += deltaTime;
-
+			
 			//Mover el cubo segun el tiempo
-			cube.position.y = sin(globalTime) * sinWidth;
+			cube.position.y = sin(TM->GetGlobalTime()) * sinWidth;
 
 			//Rotar en Y indefinidamente
-			cube.rotation.y += cubeRotaionSpeed * deltaTime;
+			cube.rotation.y += cubeRotaionSpeed * TM->GetDeltaTime();
 
 			if(showCube)
 				RenderGameObject(cube, cubeVao, 1);
@@ -643,19 +638,19 @@ void main() {
 			glUseProgram(compiledPrograms[1]);
 
 			//rota z indefinidamente
-			rect.rotation.z += rectRotationSpeed * deltaTime;
+			rect.rotation.z += rectRotationSpeed * TM->GetDeltaTime();
 
 			//A ojo podemos observar que estos valores son acceptables para lo que queremos vislauizar
 			//basados en pura intuición, el cub se expanidirá y contraerá cada 3 segundos
-			isExpanding = (int)globalTime % 6 < 3;
+			isExpanding = (int)TM->GetGlobalTime() % 6 < 3;
 
 			if (isExpanding)
 			{
-				rect.scale += glm::vec3(0.3f, 0.0f, -0.4f) * deltaTime; // Escala de crecimiento menos en y para que escale como ortoedro que es 
+				rect.scale += glm::vec3(0.3f, 0.0f, -0.4f) * TM->GetDeltaTime(); // Escala de crecimiento menos en y para que escale como ortoedro que es 
 			}
 			else
 			{
-				rect.scale -= glm::vec3(0.3f, 0.0f, -0.4f) * deltaTime; 
+				rect.scale -= glm::vec3(0.3f, 0.0f, -0.4f) * TM->GetDeltaTime();
 			}
 
 			if(showRect)
@@ -663,11 +658,11 @@ void main() {
 
 
 			//Mover el cubo segun el tiempo
-			pyramid.position.y = sin(globalTime) * sinWidthPyramid;
+			pyramid.position.y = sin(TM->GetGlobalTime()) * sinWidthPyramid;
 
 			//Rotar en X e Y indefinidamente
-			pyramid.rotation.y += pyramidRotationSpeed * deltaTime;
-			pyramid.rotation.x += pyramidRotationSpeed * deltaTime;
+			pyramid.rotation.y += pyramidRotationSpeed * TM->GetDeltaTime();
+			pyramid.rotation.x += pyramidRotationSpeed * TM->GetDeltaTime();
 
 			if(showPyramid)
 				RenderGameObject(pyramid, vaoPiramide, 2, 18);
