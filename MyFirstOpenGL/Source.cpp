@@ -198,9 +198,6 @@ void main()
 				renderer.RenderObject(*cube, *cubeMesh, compiledPrograms[0], 14);
 
 
-			//Indicar a la tarjeta GPU que programa debe usar
-			glUseProgram(compiledPrograms[1]);
-
 			//rota z indefinidamente
 			rect->transform.rotation.z += rectRotationSpeed * TM->GetDeltaTime();
 

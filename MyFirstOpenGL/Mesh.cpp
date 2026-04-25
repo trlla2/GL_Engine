@@ -15,7 +15,7 @@ Mesh::Mesh(const GLfloat* vertices, size_t vertexDataSize, int vertexCount)  : v
 	//Indico que el VBO activo es el que acabo de crear y que almacenar� un array. Todos los VBO que genere se asignaran al ultimo VAO que he hecho glBindVertexArray
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	//Ponemos los valores en el VBO creado
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexDataSize), vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertexDataSize, vertices, GL_STATIC_DRAW);
 
 	//Indicamos donde almacenar y como esta distribuida la informaci�n
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);

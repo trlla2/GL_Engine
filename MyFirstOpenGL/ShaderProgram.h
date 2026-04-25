@@ -19,12 +19,12 @@ private:
 public:
 	GLuint programId = 0;
 
-	ShaderProgram(std::string vertexFileName, std::string  geometryFileName, std::string fragmentFilename)
+	ShaderProgram(std::string vertexFileName, std::string geometryFileName, std::string fragmentFilename)
 	{
-		vertexShader = vertexShaderLoader.LoadVertexShader("CubeVertexShader.glsl");
-		geometryShader = geometryShaderLoader.LoadGeometryShader("CubeGeometryShader.glsl");
-		fragmentShader = fragmentShaderLoader.LoadFragmentShader("CubeFragmentShader.glsl");
+		vertexShader = vertexShaderLoader.LoadVertexShader(vertexFileName);
+		geometryShader = geometryShaderLoader.LoadGeometryShader(geometryFileName);
+		fragmentShader = fragmentShaderLoader.LoadFragmentShader(fragmentFilename);
 
-		CreateProgram();
+		programId = CreateProgram();
 	}
 };
