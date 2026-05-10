@@ -18,11 +18,6 @@ public:
 	GameObject() = default;
 };
 
-class Camera {
-public:
-	Transform transform;
-};
-
 class Cube : public GameObject
 {
 

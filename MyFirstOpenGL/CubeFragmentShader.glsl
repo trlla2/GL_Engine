@@ -4,6 +4,7 @@
 
 uniform vec2 windowSize;
 
+
 out vec4 fragColor;
 
 void main() 
