@@ -1,39 +1,50 @@
 ﻿#include "Mesh.h"
 #include <GL/glew.h>
 
-Mesh::Mesh(const GLfloat* vertices, size_t vertexDataSize, int vertexCount)  : vertexCount(vertexCount)
+Mesh::Mesh(const std::vector<float>& vertices, const std::vector<float>& uvs, const std::vector<float>& normals) : vertexCount(vertices.size() / 3), vboUVs(0), vboNormals(0)
 {
-    ///Definimos cantidad de vao a crear y donde almacenarlos 
-	glGenVertexArrays(1, &vao);
 
-	//Indico que el VAO activo de la GPU es el que acabo de crear
-	glBindVertexArray(vao);
+    //Almaceno la cantidad de vertices que habra
+    this->vertexCount = vertices.size() / 3;
 
-	//Definimos cantidad de vbo a crear y donde almacenarlos
-	glGenBuffers(1, &vbo);
+    //Generamos VAO/VBO
+    glGenVertexArrays(1, &this->vao);
+    glGenBuffers(1, &this->vbo);
 
-	//Indico que el VBO activo es el que acabo de crear y que almacenar� un array. Todos los VBO que genere se asignaran al ultimo VAO que he hecho glBindVertexArray
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	//Ponemos los valores en el VBO creado
-	glBufferData(GL_ARRAY_BUFFER, vertexDataSize, vertices, GL_STATIC_DRAW);
+    //Defino el VAO creado como activo
+    glBindVertexArray(this->vao);
 
-	//Indicamos donde almacenar y como esta distribuida la informaci�n
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+    //Defino el VBO de las posiciones como activo, le paso los datos y lo configuro
+    glBindBuffer(GL_ARRAY_BUFFER, this->vbo);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
-	//Indicamos que la tarjeta grafica puede usar el atributo 0
-	glEnableVertexAttribArray(0);
+    //Activamos el atributo 0 (posiciones por defecto)
+    glEnableVertexAttribArray(0);
 
-	//Desvinculamos VBO
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+    //Desvinculamos VAO y VBO
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 
-	//Desvinculamos VAO
-	glBindVertexArray(0);
 }
 
 Mesh::~Mesh()
 {
     glDeleteBuffers(1, &vbo);
+    if (vboUVs != 0) glDeleteBuffers(1, &vboUVs);
+    if (vboNormals != 0) glDeleteBuffers(1, &vboNormals);
     glDeleteVertexArrays(1, &vao);
+}
+
+void Mesh::Render() const 
+{
+
+	this->Bind();
+
+    // Dibujamos
+    glDrawArrays(GL_TRIANGLES, 0, this->vertexCount);
+
+	this->Unbind();
 }
 
 void Mesh::Bind() const
@@ -44,4 +55,9 @@ void Mesh::Bind() const
 void Mesh::Unbind() const
 {
     glBindVertexArray(0);
+}
+
+int Mesh::GetVertexCount() const
+{
+    return vertexCount;
 }
