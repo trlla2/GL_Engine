@@ -5,16 +5,21 @@
 #include <gtc/matrix_transform.hpp>
 #include <iostream>
 #include <string>
+#include <sstream>
+#include <fstream>
 #include <vector>
 #include "InputManager.h"
 #include "TimeManager.h"
 #include "ShaderProgram.h"
 #include "Renderer.h"
+#include "Mesh.h"
+#include "GameObjects.h"
 
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
 
 std::vector<GLuint> compiledPrograms;
+std::vector<Mesh> meshes;
 
 void Resize_Window(GLFWwindow* window, int iFrameBufferWidth, int iFrameBufferHeight) {
 	//Definir nuevo tamano del viewport
@@ -25,6 +30,243 @@ void Resize_Window(GLFWwindow* window, int iFrameBufferWidth, int iFrameBufferHe
 		glUseProgram(compiledPrograms[i]);
 		glUniform2f(glGetUniformLocation(compiledPrograms[i], "windowSize"), iFrameBufferWidth, iFrameBufferHeight);
 	}
+}
+
+#pragma region IA Prompt
+//Propt a la IA:
+/*
+* //Funcion que leera un .obj y devolvera un modelo para poder ser renderizado
+Model LoadOBJModel(const std::string& filePath) {
+
+	//Verifico archivo y si no puedo abrirlo cierro aplicativo
+	std::ifstream file(filePath);
+
+	if (!file.is_open()) {
+		std::cerr << "No se ha podido abrir el archivo: " << filePath << std::endl;
+		std::exit(EXIT_FAILURE);
+	}
+
+	//Variables lectura fichero
+	std::string line;
+	std::stringstream ss;
+	std::string prefix;
+	glm::vec3 tmpVec3;
+	glm::vec2 tmpVec2;
+
+	//Variables elemento modelo
+	std::vector<float> vertexs;
+	std::vector<float> vertexNormal;
+	std::vector<float> textureCoordinates;
+
+	//Variables temporales para algoritmos de sort
+	std::vector<float> tmpVertexs;
+	std::vector<float> tmpNormals;
+	std::vector<float> tmpTextureCoordinates;
+
+	//Recorremos archivo linea por linea
+	while (std::getline(file, line)) {
+
+		//Por cada linea reviso el prefijo del archivo que me indica que estoy analizando
+		ss.clear();
+		ss.str(line);
+		ss >> prefix;
+
+		//Estoy leyendo un vertice
+		if (prefix == "v") {
+
+			//Asumo que solo trabajo 3D así que almaceno XYZ de forma consecutiva
+			ss >> tmpVec3.x >> tmpVec3.y >> tmpVec3.z;
+
+			//Almaceno en mi vector de vertices los valores
+			tmpVertexs.push_back(tmpVec3.x);
+			tmpVertexs.push_back(tmpVec3.y);
+			tmpVertexs.push_back(tmpVec3.z);
+		}
+
+		//Estoy leyendo una UV (texture coordinate)
+		else if (prefix == "vt") {
+
+			//Las UVs son siempre imagenes 2D asi que uso el tmpvec2 para almacenarlas
+			ss >> tmpVec2.x >> tmpVec2.y;
+
+			//Almaceno en mi vector temporal las UVs
+			tmpTextureCoordinates.push_back(tmpVec2.x);
+			tmpTextureCoordinates.push_back(tmpVec2.y);
+
+		}
+
+		//Estoy leyendo una normal
+		else if (prefix == "vn") {
+
+			//Asumo que solo trabajo 3D así que almaceno XYZ de forma consecutiva
+			ss >> tmpVec3.x >> tmpVec3.y >> tmpVec3.z;
+
+			//Almaceno en mi vector temporal de normales las normales
+			tmpNormals.push_back(tmpVec3.x);
+			tmpNormals.push_back(tmpVec3.y);
+			tmpNormals.push_back(tmpVec3.z);
+
+		}
+
+		//Estoy leyendo una cara
+		else if (prefix == "f") {
+
+			int vertexData;
+			short counter = 0;
+
+			//Obtengo todos los valores hasta un espacio
+			while (ss >> vertexData) {
+
+				//En orden cada numero sigue el patron de vertice/uv/normal
+				switch (counter) {
+				case 0:
+					//Si es un vertice lo almaceno - 1 por el offset y almaceno dos seguidos al ser un vec3, salto 1 / y aumento el contador en 1
+					vertexs.push_back(tmpVertexs[(vertexData - 1) * 3]);
+					vertexs.push_back(tmpVertexs[((vertexData - 1) * 3) + 1]);
+					vertexs.push_back(tmpVertexs[((vertexData - 1) * 3) + 2]);
+					ss.ignore(1, '/');
+					counter++;
+					break;
+				case 1:
+					//Si es un uv lo almaceno - 1 por el offset y almaceno dos seguidos al ser un vec2, salto 1 / y aumento el contador en 1
+					textureCoordinates.push_back(tmpTextureCoordinates[(vertexData - 1) * 2]);
+					textureCoordinates.push_back(tmpTextureCoordinates[((vertexData - 1) * 2) + 1]);
+					ss.ignore(1, '/');
+					counter++;
+					break;
+				case 2:
+					//Si es una normal la almaceno - 1 por el offset y almaceno tres seguidos al ser un vec3, salto 1 / y reinicio
+					vertexNormal.push_back(tmpNormals[(vertexData - 1) * 3]);
+					vertexNormal.push_back(tmpNormals[((vertexData - 1) * 3) + 1]);
+					vertexNormal.push_back(tmpNormals[((vertexData - 1) * 3) + 2]);
+					counter = 0;
+					break;
+				}
+			}
+		}
+	}
+	return Model(vertexs, textureCoordinates, vertexNormal);
+}
+
+rerwite this functiion to work with my Mesh Class
+(esta función la he sacado de el codigo de classe)
+*/
+
+#pragma endregion
+//Funcion que leera un .obj y devolvera un mesh para poder ser renderizado
+Mesh* LoadOBJMesh(const std::string& filePath) {
+
+	//Verifico archivo y si no puedo abrirlo cierro aplicativo
+	std::ifstream file(filePath);
+
+	if (!file.is_open()) {
+		std::cerr << "No se ha podido abrir el archivo: " << filePath << std::endl;
+		std::exit(EXIT_FAILURE);
+	}
+
+	//Variables lectura fichero
+	std::string line;
+	std::stringstream ss;
+	std::string prefix;
+	glm::vec3 tmpVec3;
+	glm::vec2 tmpVec2;
+
+	//Variables elemento modelo
+	std::vector<float> vertices;
+	std::vector<float> normals;
+	std::vector<float> uvs;
+
+	//Variables temporales para algoritmos de sort
+	std::vector<float> tmpVertices;
+	std::vector<float> tmpNormals;
+	std::vector<float> tmpUVs;
+
+	//Recorremos archivo linea por linea
+	while (std::getline(file, line)) {
+
+		//Por cada linea reviso el prefijo del archivo que me indica que estoy analizando
+		ss.clear();
+		ss.str(line);
+		ss >> prefix;
+
+		//Estoy leyendo un vertice
+		if (prefix == "v") {
+
+			//Asumo que solo trabajo 3D así que almaceno XYZ de forma consecutiva
+			ss >> tmpVec3.x >> tmpVec3.y >> tmpVec3.z;
+
+			//Almaceno en mi vector de vertices los valores
+			tmpVertices.push_back(tmpVec3.x);
+			tmpVertices.push_back(tmpVec3.y);
+			tmpVertices.push_back(tmpVec3.z);
+		}
+
+		//Estoy leyendo una UV (texture coordinate)
+		else if (prefix == "vt") {
+
+			//Las UVs son siempre imagenes 2D asi que uso el tmpvec2 para almacenarlas
+			ss >> tmpVec2.x >> tmpVec2.y;
+
+			//Almaceno en mi vector temporal las UVs
+			tmpUVs.push_back(tmpVec2.x);
+			tmpUVs.push_back(tmpVec2.y);
+
+		}
+
+		//Estoy leyendo una normal
+		else if (prefix == "vn") {
+
+			//Asumo que solo trabajo 3D así que almaceno XYZ de forma consecutiva
+			ss >> tmpVec3.x >> tmpVec3.y >> tmpVec3.z;
+
+			//Almaceno en mi vector temporal de normales las normales
+			tmpNormals.push_back(tmpVec3.x);
+			tmpNormals.push_back(tmpVec3.y);
+			tmpNormals.push_back(tmpVec3.z);
+
+		}
+
+		//Estoy leyendo una cara
+		else if (prefix == "f") {
+
+			int vertexData;
+			short counter = 0;
+
+			//Obtengo todos los valores hasta un espacio
+			while (ss >> vertexData) {
+
+				//En orden cada numero sigue el patron de vertice/uv/normal
+				switch (counter) {
+				case 0:
+					//Si es un vertice lo almaceno - 1 por el offset y almaceno dos seguidos al ser un vec3, salto 1 / y aumento el contador en 1
+					vertices.push_back(tmpVertices[(vertexData - 1) * 3]);
+					vertices.push_back(tmpVertices[((vertexData - 1) * 3) + 1]);
+					vertices.push_back(tmpVertices[((vertexData - 1) * 3) + 2]);
+					ss.ignore(1, '/');
+					counter++;
+					break;
+				case 1:
+					//Si es un uv lo almaceno - 1 por el offset y almaceno dos seguidos al ser un vec2, salto 1 / y aumento el contador en 1
+					uvs.push_back(tmpUVs[(vertexData - 1) * 2]);
+					uvs.push_back(tmpUVs[((vertexData - 1) * 2) + 1]);
+					ss.ignore(1, '/');
+					counter++;
+					break;
+				case 2:
+					//Si es una normal la almaceno - 1 por el offset y almaceno tres seguidos al ser un vec3, salto 1 / y reinicio
+					normals.push_back(tmpNormals[(vertexData - 1) * 3]);
+					normals.push_back(tmpNormals[((vertexData - 1) * 3) + 1]);
+					normals.push_back(tmpNormals[((vertexData - 1) * 3) + 2]);
+					counter = 0;
+					break;
+				}
+			}
+		}
+	}
+
+	file.close();
+
+	return new Mesh(vertices, uvs, normals);
 }
 
 void main() 
@@ -55,85 +297,71 @@ void main()
 
 	//Activamos cull face
 	glEnable(GL_CULL_FACE);
+	//Activamos depth test
+	glEnable(GL_DEPTH_TEST);
 
 	//Indicamos lado del culling
 	glCullFace(GL_BACK);
 
 	if (glewInit() == GLEW_OK)
 	{
+		// Crear shader para el Troll
+		ShaderProgram* trollShader = new ShaderProgram("CubeVertexShader.glsl", "CubeGeometryShader.glsl", "CubeFragmentShader.glsl");
+		compiledPrograms.push_back(trollShader->programId);
 
-		//Declarar instancia de GameObject
-		Cube* cube = new Cube();
-		Pyramid* pyramid = new Pyramid();
-		Rect* rect = new Rect();
+		// Cargar mesh del Troll
+		Mesh* trollMesh = LoadOBJMesh("Assets/Modelos/troll.obj");
+		meshes.push_back(*trollMesh);
 
-		//Compilar shaders
-		ShaderProgram* cubeProgram = new ShaderProgram("CubeVertexShader.glsl", "CubeGeometryShader.glsl", "CubeFragmentShader.glsl");
-		ShaderProgram* rectProgram = new ShaderProgram("RectVertexShader.glsl", "RectGeometryShader.glsl", "RectFragmentShader.glsl");
-		ShaderProgram* pyramidProgram = new ShaderProgram("PyramidVertexShader.glsl", "PyramidGeometryShader.glsl", "PyramidFragmentShader.glsl");
-
-		compiledPrograms.push_back(cubeProgram->programId);
-		compiledPrograms.push_back(rectProgram->programId);
-		compiledPrograms.push_back(pyramidProgram->programId);
-
-		// Crear meshes usando la clase Mesh
-		Mesh* cubeMesh = new Mesh(cube->vertices, sizeof(cube->vertices), 14);
-		Mesh* rectMesh = new Mesh(rect->vertices, sizeof(rect->vertices), 14);
-		Mesh* pyramidMesh = new Mesh(pyramid->vertices, sizeof(pyramid->vertices), 18);
+		// Crear el Troll GameObject
+		Troll* troll = new Troll(trollMesh, trollShader);
 
 		// Crear renderer
 		Renderer renderer;
 
 		//Definimos color para limpiar el buffer de color
 		renderer.SetClearColor(0.f, 0.f, 0.f, 1.f);
+
 		//Definimos modo de dibujo para cada cara
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-		//Asignar valores iniciales al programa (windowSize uniforms)
+		//Asignar valores iniciales al shader
 		for (size_t i = 0; i < compiledPrograms.size(); i++) {
 			glUseProgram(compiledPrograms[i]);
 			glUniform2f(glGetUniformLocation(compiledPrograms[i], "windowSize"), WINDOW_WIDTH, WINDOW_HEIGHT);
 		}
 
-		//Defino la transform inicial del gameobject (cubo)
-		cube->transform.position = glm::vec3(-0.6f, 0.f, 0.f);
-		cube->transform.rotation = glm::vec3(60.f, 0.f, 0.f);
-		cube->transform.scale = glm::vec3(0.5f, 0.5f, 0.5f);
-
-		const float sinWidth = 0.7f;
-		const float cubeRotationSpeed = 10.f;
-
-		//Defino la transform inicial del gameobject (orthoedro)
-		rect->transform.position = glm::vec3(0.f, 0.f, 0.f);
-		rect->transform.rotation = glm::vec3(80.f, 0.f, 0.f);
-		rect->transform.scale = glm::vec3(0.5f, 0.5f, 0.5f);
-
-		const float rectRotationSpeed = 20.f;
-		bool isExpanding = true;
-
-		//Defino la transform inicial del gameobject (piramide)
-		pyramid->transform.position = glm::vec3(0.65f, 0.f, 0.f);
-		pyramid->transform.rotation = glm::vec3(270.f, 0.f, 0.f);
-		pyramid->transform.scale = glm::vec3(1.f, 1.f, 1.75f);
-
-		const float sinWidthPyramid = 0.5f;
-		const float pyramidRotationSpeed = 35.f;
-
 		// Input variables
 		bool showWireframe = false;
-
-		bool showCube = true;
-		bool showRect = true;
-		bool showPyramid = true;
-
-		//Generamos el game loop
 
 		// Activamos el Input Manager con la ventana 
 		IM->Init(window);
 
+		// Setup camera matrices
+		glm::mat4 viewMatrix = glm::lookAt(
+			glm::vec3(0.0f, 0.0f, 5.0f),  // Camera position
+			glm::vec3(0.0f, 0.0f, 0.0f),  // Look at point
+			glm::vec3(0.0f, 1.0f, 0.0f)   // Up vector
+		);
+
+		glm::mat4 projectionMatrix = glm::perspective(
+			glm::radians(45.0f),                           // FOV
+			(float)WINDOW_WIDTH / (float)WINDOW_HEIGHT,   // Aspect ratio
+			0.1f,                                          // Near plane
+			100.0f                                         // Far plane
+		);
+
+		// Set matrices in shader
+		for (size_t i = 0; i < compiledPrograms.size(); i++) {
+			glUseProgram(compiledPrograms[i]);
+			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[i], "viewMatrix"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
+			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[i], "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+		}
+
+
+		//Generamos el game loop
 		while (!glfwWindowShouldClose(window))
 		{
-
 			//Pulleamos los eventos (botones, teclas, mouse...)
 			glfwPollEvents();
 
@@ -155,21 +383,6 @@ void main()
 				glPolygonMode(GL_FRONT_AND_BACK, showWireframe ? GL_LINE : GL_FILL);
 			}
 
-			if (IM->GetEventKey(GLFW_KEY_2, KeyState::DOWN))
-			{
-				showCube = !showCube;
-			}
-
-			if (IM->GetEventKey(GLFW_KEY_3, KeyState::DOWN))
-			{
-				showRect = !showRect;
-			}
-
-			if (IM->GetEventKey(GLFW_KEY_4, KeyState::DOWN))
-			{
-				showPyramid = !showPyramid;
-			}
-
 			if (IM->GetEventKey(GLFW_KEY_SPACE, KeyState::DOWN))
 			{
 				if (TM->GetScaleTime() != 0.f)
@@ -188,52 +401,23 @@ void main()
 				TM->SetScaleTime(TM->GetScaleTime() - 0.1f);
 			}
 
-			//Mover el cubo segun el tiempo
-			cube->transform.position.y = sin(TM->GetGlobalTime()) * sinWidth;
-
-			//Rotar en Y indefinidamente
-			cube->transform.rotation.y += cube->rotationSpeed * TM->GetDeltaTime();
-
-			if (showCube)
-				renderer.RenderObject(*cube, *cubeMesh, compiledPrograms[0], 14);
-
-
-			//rota z indefinidamente
-			rect->transform.rotation.z += rectRotationSpeed * TM->GetDeltaTime();
-
-			//Expandir/contraer cada 3 segundos
-			isExpanding = (int)TM->GetGlobalTime() % 6 < 3;
-
-			if (isExpanding) {
-				rect->transform.scale += glm::vec3(0.3f, 0.0f, -0.4f) * TM->GetDeltaTime();
-			} else {
-				rect->transform.scale -= glm::vec3(0.3f, 0.0f, -0.4f) * TM->GetDeltaTime();
-			}
-
-			if (showRect)
-				renderer.RenderObject(*rect, *rectMesh, compiledPrograms[1], 14);
-
-
-			pyramid->transform.position.y = sin(TM->GetGlobalTime()) * sinWidthPyramid;
-			pyramid->transform.rotation.y += pyramidRotationSpeed * TM->GetDeltaTime();
-			pyramid->transform.rotation.x += pyramidRotationSpeed * TM->GetDeltaTime();
-
-			if (showPyramid)
-				renderer.RenderPyramid(*pyramid, *pyramidMesh, compiledPrograms[2], 18);
-
+			// Renderizar mesh
+			renderer.RenderObject(*troll, *troll->mesh, troll->shaderProgram->programId, troll->mesh->GetVertexCount());
 
 			//Cambiamos buffers
 			glFlush();
 			glfwSwapBuffers(window);
 		}
 
+		// Cleanup
+		delete troll;
+
 	}
-		
-else
-		{
-			std::cout << "Ha petao." << std::endl;
-			glfwTerminate();
-		}
+	else
+	{
+		std::cout << "Ha petao." << std::endl;
+		glfwTerminate();
+	}
 
 	//Finalizamos GLFW
 	glfwTerminate();
