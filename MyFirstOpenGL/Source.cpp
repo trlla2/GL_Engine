@@ -10,7 +10,6 @@
 #include "TimeManager.h"
 #include "ShaderProgram.h"
 #include "Renderer.h"
-#include "Camera.h"
 
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
@@ -62,10 +61,6 @@ void main()
 
 	if (glewInit() == GLEW_OK)
 	{
-
-		// Delcarar camara
-		Camera camera;
-
 
 		//Declarar instancia de GameObject
 		Cube* cube = new Cube();
@@ -202,7 +197,6 @@ void main()
 			if (showCube)
 				renderer.RenderObject(*cube, *cubeMesh, compiledPrograms[0], 14);
 
-			glm::mat4 projectionMatrix = glm::perspective(glm::radians(camera.fFov), (float)(WINDOW_WIDTH) / (float)(WINDOW_HEIGHT), camera.fNear, camera.fFar);
 
 			//rota z indefinidamente
 			rect->transform.rotation.z += rectRotationSpeed * TM->GetDeltaTime();
