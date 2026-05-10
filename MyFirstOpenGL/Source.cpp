@@ -199,12 +199,11 @@ void main()
 		}
 
 	}
-		
-else
-		{
-			std::cout << "Ha petao." << std::endl;
-			glfwTerminate();
-		}
+	else
+	{
+		std::cout << "Ha petao." << std::endl;
+		glfwTerminate();
+	}
 
 	//Finalizamos GLFW
 	glfwTerminate();
