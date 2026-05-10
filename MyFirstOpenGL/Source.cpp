@@ -27,6 +27,20 @@ void Resize_Window(GLFWwindow* window, int iFrameBufferWidth, int iFrameBufferHe
 	}
 }
 
+
+
+struct Camera {
+
+	int minFov = 1, maxFov = 90;
+
+	glm::vec3 position = glm::vec3(0.0f, 0.0f, 2.0f);  
+	glm::vec3 localVectorUp = glm::vec3(0.f, 1.f, 0.f);
+
+	float fFov = 45.f;
+	float fNear = 0.1f;
+	float fFar = 10.f;
+};
+
 void main() 
 {
 	// Inicializar el gestor de tiempo
@@ -59,27 +73,24 @@ void main()
 	//Indicamos lado del culling
 	glCullFace(GL_BACK);
 
+	//Habilitamos depth testing
+	glEnable(GL_DEPTH_TEST);
+
 	if (glewInit() == GLEW_OK)
 	{
 
 		//Declarar instancia de GameObject
 		Cube* cube = new Cube();
-		Pyramid* pyramid = new Pyramid();
-		Rect* rect = new Rect();
+
+		Camera camera;
 
 		//Compilar shaders
 		ShaderProgram* cubeProgram = new ShaderProgram("CubeVertexShader.glsl", "CubeGeometryShader.glsl", "CubeFragmentShader.glsl");
-		ShaderProgram* rectProgram = new ShaderProgram("RectVertexShader.glsl", "RectGeometryShader.glsl", "RectFragmentShader.glsl");
-		ShaderProgram* pyramidProgram = new ShaderProgram("PyramidVertexShader.glsl", "PyramidGeometryShader.glsl", "PyramidFragmentShader.glsl");
 
 		compiledPrograms.push_back(cubeProgram->programId);
-		compiledPrograms.push_back(rectProgram->programId);
-		compiledPrograms.push_back(pyramidProgram->programId);
 
 		// Crear meshes usando la clase Mesh
 		Mesh* cubeMesh = new Mesh(cube->vertices, sizeof(cube->vertices), 14);
-		Mesh* rectMesh = new Mesh(rect->vertices, sizeof(rect->vertices), 14);
-		Mesh* pyramidMesh = new Mesh(pyramid->vertices, sizeof(pyramid->vertices), 18);
 
 		// Crear renderer
 		Renderer renderer;
@@ -103,28 +114,13 @@ void main()
 		const float sinWidth = 0.7f;
 		const float cubeRotationSpeed = 10.f;
 
-		//Defino la transform inicial del gameobject (orthoedro)
-		rect->transform.position = glm::vec3(0.f, 0.f, 0.f);
-		rect->transform.rotation = glm::vec3(80.f, 0.f, 0.f);
-		rect->transform.scale = glm::vec3(0.5f, 0.5f, 0.5f);
-
-		const float rectRotationSpeed = 20.f;
 		bool isExpanding = true;
 
-		//Defino la transform inicial del gameobject (piramide)
-		pyramid->transform.position = glm::vec3(0.65f, 0.f, 0.f);
-		pyramid->transform.rotation = glm::vec3(270.f, 0.f, 0.f);
-		pyramid->transform.scale = glm::vec3(1.f, 1.f, 1.75f);
-
-		const float sinWidthPyramid = 0.5f;
-		const float pyramidRotationSpeed = 35.f;
 
 		// Input variables
 		bool showWireframe = false;
 
 		bool showCube = true;
-		bool showRect = true;
-		bool showPyramid = true;
 
 		//Generamos el game loop
 
@@ -147,6 +143,16 @@ void main()
 
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
+			//Calcular matrices de cámara
+			glm::mat4 viewMatrix = glm::lookAt(camera.position, camera.position + glm::vec3(0.f, 0.f, -1.f), camera.localVectorUp);
+			camera.fFov = camera.fFov < camera.minFov ? camera.minFov : camera.fFov;
+			camera.fFov = camera.fFov > camera.maxFov ? camera.maxFov : camera.fFov;
+			glm::mat4 projectionMatrix = glm::perspective(glm::radians(camera.fFov), (float)(WINDOW_WIDTH) / (float)(WINDOW_HEIGHT), camera.fNear, camera.fFar);
+
+			//Enviar matrices al shader
+			glUseProgram(compiledPrograms[0]);
+			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "viewMatrix"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
 
 			//INPUT 
 			if (IM->GetEventKey(GLFW_KEY_1, KeyState::DOWN))
@@ -160,15 +166,6 @@ void main()
 				showCube = !showCube;
 			}
 
-			if (IM->GetEventKey(GLFW_KEY_3, KeyState::DOWN))
-			{
-				showRect = !showRect;
-			}
-
-			if (IM->GetEventKey(GLFW_KEY_4, KeyState::DOWN))
-			{
-				showPyramid = !showPyramid;
-			}
 
 			if (IM->GetEventKey(GLFW_KEY_SPACE, KeyState::DOWN))
 			{
@@ -196,44 +193,17 @@ void main()
 
 			if (showCube)
 				renderer.RenderObject(*cube, *cubeMesh, compiledPrograms[0], 14);
-
-
-			//rota z indefinidamente
-			rect->transform.rotation.z += rectRotationSpeed * TM->GetDeltaTime();
-
-			//Expandir/contraer cada 3 segundos
-			isExpanding = (int)TM->GetGlobalTime() % 6 < 3;
-
-			if (isExpanding) {
-				rect->transform.scale += glm::vec3(0.3f, 0.0f, -0.4f) * TM->GetDeltaTime();
-			} else {
-				rect->transform.scale -= glm::vec3(0.3f, 0.0f, -0.4f) * TM->GetDeltaTime();
-			}
-
-			if (showRect)
-				renderer.RenderObject(*rect, *rectMesh, compiledPrograms[1], 14);
-
-
-			pyramid->transform.position.y = sin(TM->GetGlobalTime()) * sinWidthPyramid;
-			pyramid->transform.rotation.y += pyramidRotationSpeed * TM->GetDeltaTime();
-			pyramid->transform.rotation.x += pyramidRotationSpeed * TM->GetDeltaTime();
-
-			if (showPyramid)
-				renderer.RenderPyramid(*pyramid, *pyramidMesh, compiledPrograms[2], 18);
-
-
 			//Cambiamos buffers
 			glFlush();
 			glfwSwapBuffers(window);
 		}
 
 	}
-		
-else
-		{
-			std::cout << "Ha petao." << std::endl;
-			glfwTerminate();
-		}
+	else
+	{
+		std::cout << "Ha petao." << std::endl;
+		glfwTerminate();
+	}
 
 	//Finalizamos GLFW
 	glfwTerminate();
