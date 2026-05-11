@@ -80,12 +80,15 @@ ScaffoldingReadMe.txt
 # StyleCop
 StyleCopReport.xml
 
+
+
 # Files built by Visual Studio
 *_i.c
 *_p.c
 *_h.h
 *.ilk
 *.meta
+*.obj
 *.idb
 *.iobj
 *.pch
