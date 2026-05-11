@@ -14,6 +14,7 @@
 #include "Renderer.h"
 #include "Mesh.h"
 #include "GameObjects.h"
+#include "Camera.h"
 
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
@@ -31,19 +32,6 @@ void Resize_Window(GLFWwindow* window, int iFrameBufferWidth, int iFrameBufferHe
 		glUniform2f(glGetUniformLocation(compiledPrograms[i], "windowSize"), iFrameBufferWidth, iFrameBufferHeight);
 	}
 }
-
-
-struct Camera {
-
-	int minFov = 1, maxFov = 90;
-
-	glm::vec3 position = glm::vec3(0.0f, 0.0f, 2.0f);  
-	glm::vec3 localVectorUp = glm::vec3(0.f, 1.f, 0.f);
-
-	float fFov = 45.f;
-	float fNear = 0.1f;
-	float fFar = 10.f;
-};
 
 #pragma region IA Prompt
 //Propt a la IA:
@@ -378,17 +366,9 @@ void main()
 
 
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-			//Calcular matrices de cámara
-			glm::mat4 viewMatrix = glm::lookAt(camera.position, camera.position + glm::vec3(0.f, 0.f, -1.f), camera.localVectorUp);
-			camera.fFov = camera.fFov < camera.minFov ? camera.minFov : camera.fFov;
-			camera.fFov = camera.fFov > camera.maxFov ? camera.maxFov : camera.fFov;
-			glm::mat4 projectionMatrix = glm::perspective(glm::radians(camera.fFov), (float)(WINDOW_WIDTH) / (float)(WINDOW_HEIGHT), camera.fNear, camera.fFar);
-
-			//Enviar matrices al shader
-			glUseProgram(compiledPrograms[0]);
-			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
-			glUniformMatrix4fv(glGetUniformLocation(compiledPrograms[0], "viewMatrix"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
+			
+			// actualizar las matrizes de la camara
+			camera.Update(&compiledPrograms[0], WINDOW_WIDTH, WINDOW_HEIGHT);
 
 			//INPUT 
 			if (IM->GetEventKey(GLFW_KEY_1, KeyState::DOWN))
