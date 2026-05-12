@@ -310,8 +310,10 @@ void main()
 		ShaderProgram* trollShader = new ShaderProgram("CubeVertexShader.glsl", "CubeGeometryShader.glsl", "CubeFragmentShader.glsl");
 		compiledPrograms.push_back(trollShader->programId);
 
-
+		// Create camera
 		Camera camera;
+		camera.transform.position = glm::vec3(0.f, 0.5f, 4.f);
+		camera.transform.rotation = glm::vec3(0.f, 0.f, 0.f);
 
 		//Compilar shaders
 		ShaderProgram* cubeProgram = new ShaderProgram("CubeVertexShader.glsl", "CubeGeometryShader.glsl", "CubeFragmentShader.glsl");
@@ -349,7 +351,7 @@ void main()
 
 		// Activamos el Input Manager con la ventana 
 		IM->Init(window);
-
+		troll->transform.scale = glm::vec3(1.f,1.f,1.f);
 
 		//Generamos el game loop
 		while (!glfwWindowShouldClose(window))
@@ -368,7 +370,10 @@ void main()
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 			
 			// actualizar las matrizes de la camara
+			camera.RotateOnPosition(troll->transform.position, 4.f);
+
 			camera.Update(&compiledPrograms[0], WINDOW_WIDTH, WINDOW_HEIGHT);
+
 
 			//INPUT 
 			if (IM->GetEventKey(GLFW_KEY_1, KeyState::DOWN))
