@@ -28,50 +28,46 @@ void Camera::RotateOnPosition(glm::vec3 pos, float distance)
     if (angle > 360.f)
 		angle = 0.f;
 	std::cout << "Camera angle: " << angle << std::endl;
-	// Calcular nueva posicion orbital
+	// Calcular nueva posicion 
     transform.position.x = pos.x + distance * glm::cos(glm::radians(angle));
     transform.position.z = pos.z + distance * glm::sin(glm::radians(angle));
 	transform.position.y = pos.y + 1.f;
 
-	// Establecer el punto de enfoque
+	
 	targetPosition = pos + glm::vec3(0.f, 1.0f, 0.f);
 }
 
-void Camera::DollyZoom(glm::vec3 pos)
+void Camera::DollyZoom(glm::vec3 pos, float startDegrees, float finishDegrees)
 {
+
+    
 
     if (!dollyZoomActive)
     {
         dollyZoomActive = true;
         dollyZoomTimer = 0.f;
         dollyTarget = pos;
-
-        // Guardar la distancia inicial al objetivo
-        float distance = glm::length(transform.position - pos);
-
-        // FOV inicial: usar el actual
-        // La relacion que mantiene el dolly zoom: distance * tan(fov/2) = constante
-        // => al reducir fov, acercamos la camara para compensar
     }
 
     if (dollyZoomActive)
     {
+        // actualizamos el tiempo
         dollyZoomTimer += TM->GetDeltaTime();
-        float t = dollyZoomTimer / dollyZoomDuration; // 0..1
+        float t = dollyZoomTimer / dollyZoomDuration;
 
-        // Interpolar FOV de 45 a 5 grados y volver (ida y vuelta suave)
-        float targetFov = glm::mix(45.f, 5.f, glm::smoothstep(0.f, 1.f, t));
+        // AI PROMPT: hay alguna manera de hacer una interpolacion Opengl C++
+        // Interpolar FOV
+        float targetFov = glm::mix(startDegrees, finishDegrees, glm::smoothstep(0.f, 1.f, t));
 
-        // Mantener la altura percibida del objeto: distance * tan(fov/2) = K
+		// calculamos nueva posicion 
         float K = glm::length(transform.position - dollyTarget) * glm::tan(glm::radians(fFov / 2.f));
         float newDist = K / glm::tan(glm::radians(targetFov / 2.f));
 
-        // Mover camara a lo largo del eje hacia el objetivo
+        // updateamos la posicion de la camara
         glm::vec3 dir = glm::normalize(transform.position - dollyTarget);
         transform.position = dollyTarget + dir * newDist;
 
         fFov = targetFov;
-
         if (dollyZoomTimer >= dollyZoomDuration)
         {
             dollyZoomActive = false;

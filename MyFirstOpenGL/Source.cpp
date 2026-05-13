@@ -351,7 +351,6 @@ void main()
 
 		// Activamos el Input Manager con la ventana 
 		IM->Init(window);
-		troll->transform.scale = glm::vec3(1.f,1.f,1.f);
 
 		//Generamos el game loop
 		while (!glfwWindowShouldClose(window))
@@ -370,7 +369,7 @@ void main()
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 			
 			// actualizar las matrizes de la camara
-			camera.RotateOnPosition(troll->transform.position, 4.f);
+			camera.DollyZoom(troll->transform.position);
 
 			camera.Update(&compiledPrograms[0], WINDOW_WIDTH, WINDOW_HEIGHT);
 
