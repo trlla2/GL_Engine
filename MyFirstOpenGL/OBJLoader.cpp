@@ -128,7 +128,7 @@ rerwite this functiion to work with my Mesh Class
 
 #pragma endregion
 //Funcion que leera un .obj y devolvera un mesh para poder ser renderizado
-Mesh* LoadOBJMesh(const std::string& filePath) {
+Mesh* OBJLoader::LoadOBJMesh(const std::string& filePath) {
 
 	//Verifico archivo y si no puedo abrirlo cierro aplicativo
 	std::ifstream file(filePath);

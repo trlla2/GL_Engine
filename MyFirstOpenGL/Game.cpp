@@ -76,7 +76,11 @@ void Game::Init()
     meshes.push_back(trollMesh);
 
     // Crear el Troll GameObject
-    Troll* troll = new Troll(trollMesh, trollShader);
+    GameObject* troll = CreateGameObject(trollMesh, "CubeVertexShader.glsl", "CubeGeometryShader.glsl", "CubeFragmentShader.glsl");
+
+
+    // Crear el Suelo
+    CreateFloor();
 
     //Definimos color para limpiar el buffer de color
     renderer.SetClearColor(0.f, 0.f, 0.f, 1.f);
@@ -96,10 +100,12 @@ void Game::Update()
     static bool showWireframe = false;
 
     // actualizar las matrizes de la camara
-    camera.DollyZoom(troll->transform.position);
+    camera.DollyZoom(sceneObjects[1]->transform.position);
 
-    camera.Update(&compiledPrograms[0], WINDOW_WIDTH, WINDOW_HEIGHT);
-
+    for (size_t i = 0; i < compiledPrograms.size(); i++)
+    {
+        camera.Update(&compiledPrograms[i], WINDOW_WIDTH, WINDOW_HEIGHT);
+    }
 
     //INPUT 
     if (IM->GetEventKey(GLFW_KEY_1, KeyState::DOWN))
@@ -150,4 +156,39 @@ void Game::Stop()
 
     sceneObjects.clear();
     glfwTerminate();
+}
+
+void Game::CreateFloor()
+{
+    std::vector<float> floorVertices = {
+		//trangulo 1
+        -0.5f,  0.5f, 0.0f,
+        -0.5f, -0.5f, 0.0f,
+         0.5f, -0.5f, 0.0f,
+        //triangulo 2
+        -0.5f,  0.5f, 0.0f,
+         0.5f, -0.5f, 0.0f,
+         0.5f,  0.5f, 0.0f,
+    };
+
+	//Crear mesh del suelo y poner en array
+    Mesh* floorMesh = new Mesh(floorVertices, {}, {});
+    meshes.push_back(floorMesh);
+
+	//Crear el GameObject del suelo y poner en array
+    GameObject* floor = CreateGameObject(floorMesh, "CubeVertexShader.glsl", "CubeGeometryShader.glsl", "CubeFragmentShader.glsl");
+    floor->transform.position = glm::vec3(1.f, 0.f, 0.f);
+}
+
+GameObject* Game::CreateGameObject(Mesh* mesh, const char* vertexShader, const char* geometryShader, const char* fragmentShader)
+{
+    //Compilar shaders
+    ShaderProgram* shader = new ShaderProgram(vertexShader, geometryShader, fragmentShader);
+    compiledPrograms.push_back(shader->programId);
+
+	//Crear GO y poner en array
+    GameObject* obj = new GameObject(mesh, shader);
+    sceneObjects.push_back(obj);
+
+    return obj;
 }

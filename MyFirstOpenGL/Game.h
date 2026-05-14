@@ -31,4 +31,7 @@ private:
     void Update();
     void Render();
     void Stop();
+    void CreateFloor();
+    //USaremos para crear los objectos y assignar sus shaders
+    GameObject* CreateGameObject(Mesh* mesh, const char* vertexShader, const char* geometryShader, const char* fragmentShader);
 };

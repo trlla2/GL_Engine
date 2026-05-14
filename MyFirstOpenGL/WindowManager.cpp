@@ -1,4 +1,3 @@
-#include "GlobalVariables.h"
 #include "WindowManager.h"
 #include "Game.h"
 
