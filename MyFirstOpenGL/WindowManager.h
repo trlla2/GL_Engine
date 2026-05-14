@@ -1,14 +1,20 @@
 #pragma once
-#include <vector>
-#include "WindowManager.h"
-#include <GLFW/glfw3.h>
 #include <GL/glew.h>
+#include <GLFW/glfw3.h>
+
+//Fordward declaration pq sino el compilador llora por includes circulares
+class Game;
+
 class WindowManager
 {
-private: 
-	void Resize_Window(GLFWwindow* window, int iFrameBufferWidth, int iFrameBufferHeight);
 public:
-	void initialize();
-	void SetSettings();
-	GLFWwindow* window;
+    GLFWwindow* window = nullptr;
+
+    WindowManager() { }
+    void Init(Game* currentGame);
+    void SetSettings();
+
+private:
+	//Esta funcion es especial i no va a cambiar, es un callback que se llama cada vez que redimensionamos la ventana, por eso es static
+    static void Resize_Window(GLFWwindow* window, int width, int height);
 };
