@@ -63,7 +63,7 @@ void Game::Init()
     // Create camera
     Camera camera;
     camera.transform.position = glm::vec3(0.f, 0.5f, 4.f);
-    camera.transform.rotation = glm::vec3(0.f, 0.f, 0.f);
+    camera.transform.rotation = glm::vec3(0.f, 0.f, -50.f);
 
     //Compilar shaders
     ShaderProgram* cubeProgram = new ShaderProgram("CubeVertexShader.glsl", "CubeGeometryShader.glsl", "CubeFragmentShader.glsl");
@@ -78,6 +78,13 @@ void Game::Init()
     // Crear el Troll GameObject
     GameObject* troll = CreateGameObject(trollMesh, "CubeVertexShader.glsl", "CubeGeometryShader.glsl", "CubeFragmentShader.glsl");
 
+    //Crear mesh de roca
+	Mesh* rockMesh = objLoader.LoadOBJMesh("Assets/Modelos/rock.obj");
+	meshes.push_back(rockMesh);
+    
+	//Crear el GameObject de la roca
+	GameObject* rock = CreateGameObject(rockMesh, "CubeVertexShader.glsl", "CubeGeometryShader.glsl", "CubeFragmentShader.glsl");
+	rock->transform.position = glm::vec3(2.f, 0.f, 0.f);
 
     // Crear el Suelo
     CreateFloor();
@@ -100,7 +107,7 @@ void Game::Update()
     static bool showWireframe = false;
 
     // actualizar las matrizes de la camara
-    camera.DollyZoom(sceneObjects[1]->transform.position);
+    camera.DollyZoom(glm::vec3(0,-3.f,3));
 
     for (size_t i = 0; i < compiledPrograms.size(); i++)
     {
@@ -160,15 +167,16 @@ void Game::Stop()
 
 void Game::CreateFloor()
 {
+    	//Ia propmts: crea un suelo simple con dos triangulos usando vertices
     std::vector<float> floorVertices = {
 		//trangulo 1
-        -0.5f,  0.5f, 0.0f,
+         0.5f, -0.5f, 0.0f,
         -0.5f, -0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f,
-        //triangulo 2
         -0.5f,  0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f,
+        //triangulo 2
          0.5f,  0.5f, 0.0f,
+         0.5f, -0.5f, 0.0f,
+        -0.5f,  0.5f, 0.0f,
     };
 
 	//Crear mesh del suelo y poner en array
@@ -177,7 +185,9 @@ void Game::CreateFloor()
 
 	//Crear el GameObject del suelo y poner en array
     GameObject* floor = CreateGameObject(floorMesh, "CubeVertexShader.glsl", "CubeGeometryShader.glsl", "CubeFragmentShader.glsl");
-    floor->transform.position = glm::vec3(1.f, 0.f, 0.f);
+    floor->transform.position = glm::vec3(0.f, 0.0f, 0.f);
+    floor->transform.rotation = glm::vec3(90.f, 0.f, 0.f);
+    floor->transform.scale = glm::vec3(3.f, 3.f, 3.f);
 }
 
 GameObject* Game::CreateGameObject(Mesh* mesh, const char* vertexShader, const char* geometryShader, const char* fragmentShader)
