@@ -6,9 +6,33 @@
 
 void Camera::Update(GLuint* compiledProgram, int const windowWidth, int const windowHeight)
 {
+    
+    // CHANGE MODE 
+    static CameraMode lastMode = ORBIT;
+    if (mode != lastMode)
+    {
+        fFov = 45.f;
+        dollyZoomActive = false;
+        dollyZoomTimer = 0.f;
+        lastMode = mode;
+    }
+
+    switch (mode)
+    {
+    case ORBIT:
+        RotateOnPosition(targetPosition);
+        break;
+    case DOLLY_ZOOM:
+		DollyZoom(targetPosition);
+        break;
+    case STATIC:
+        lookAtPoint = targetPosition + glm::vec3(0.f, 1.0f, 0.f);
+        break;
+    }
+
 
 	//Calcular matrices de cámara usando lookAt directamente
-	glm::mat4 viewMatrix = glm::lookAt(transform.position, targetPosition, localVectorUp);
+	glm::mat4 viewMatrix = glm::lookAt(transform.position, lookAtPoint, localVectorUp);
 	fFov = fFov < minFov ? minFov : fFov;
 	fFov = fFov > maxFov ? maxFov : fFov;
 	glm::mat4 projectionMatrix = glm::perspective(glm::radians(fFov), (float)(windowWidth) / (float)(windowHeight), fNear, fFar);
@@ -23,7 +47,7 @@ void Camera::Update(GLuint* compiledProgram, int const windowWidth, int const wi
 void Camera::RotateOnPosition(glm::vec3 pos, float distance)
 {
 	static float angle = 0.f;
-    angle += TM->GetDeltaTime() * 45.f;
+    angle += TM->GetDeltaTime() * 15.f;
 
     if (angle > 360.f)
 		angle = 0.f;
@@ -34,19 +58,18 @@ void Camera::RotateOnPosition(glm::vec3 pos, float distance)
 	transform.position.y = pos.y + 1.f;
 
 	
-	targetPosition = pos + glm::vec3(0.f, 1.0f, 0.f);
+	lookAtPoint = pos + glm::vec3(0.f, 1.0f, 0.f);
 }
 
 void Camera::DollyZoom(glm::vec3 pos, float startDegrees, float finishDegrees)
 {
-
-    
-
     if (!dollyZoomActive)
     {
         dollyZoomActive = true;
         dollyZoomTimer = 0.f;
         dollyTarget = pos;
+        dollyInitialDist = glm::length(transform.position - dollyTarget);
+        fFov = startDegrees;
     }
 
     if (dollyZoomActive)
@@ -72,6 +95,11 @@ void Camera::DollyZoom(glm::vec3 pos, float startDegrees, float finishDegrees)
         {
             dollyZoomActive = false;
             dollyZoomTimer = 0.f;
+
+			mode = ORBIT;
+
+            targetPosition = glm::vec3(0.f, 0.f, 0.f); 
+            fFov = 45.f;
         }
     }
 }
