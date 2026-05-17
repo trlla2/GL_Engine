@@ -13,26 +13,28 @@ public:
 };
 
 class GameObject {
-
 public:
-	Transform transform;
-	glm::vec4 tint = glm::vec4(1.f, 1.f, 1.f, 1.f); // color multiplier (tint)
+    Transform transform;
+    glm::vec4 tint = glm::vec4(1.f, 1.f, 1.f, 1.f); // color multiplicador (tint)
+    GLuint texID = 0; // ID de textura OpenGL
 
-	Mesh* mesh;
-	ShaderProgram* shaderProgram;
+    Mesh* mesh;
+    ShaderProgram* shaderProgram;
 
-	GameObject(Mesh* mesh, ShaderProgram* shaderProgram) : mesh(mesh), shaderProgram(shaderProgram) {}
-	~GameObject() 
-	{
-		delete mesh;
-		delete shaderProgram;
-	}
+    GameObject(Mesh* mesh, ShaderProgram* shaderProgram) : mesh(mesh), shaderProgram(shaderProgram) {}
+    ~GameObject()
+    {
+        delete mesh;
+        delete shaderProgram;
+    }
 };
+
 class Troll : public GameObject {
 public:
-	Troll(Mesh* mesh, ShaderProgram* shaderProgram) : GameObject(mesh, shaderProgram) {}
+    Troll(Mesh* mesh, ShaderProgram* shaderProgram) : GameObject(mesh, shaderProgram) {}
 };
+
 class Rock : public GameObject {
 public:
-	Rock(Mesh* mesh, ShaderProgram* shaderProgram) : GameObject(mesh, shaderProgram) {}
+    Rock(Mesh* mesh, ShaderProgram* shaderProgram) : GameObject(mesh, shaderProgram) {}
 };

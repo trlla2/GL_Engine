@@ -8,20 +8,24 @@
 #include "WindowManager.h"
 #include "GameObjects.h"
 #include "OBJLoader.h"
+#include "TextureLoader.h"
 
 class Game
 {
 public:
-	//Variables globales (ya no son globales en si, yay!)
     std::vector<GLuint> compiledPrograms;
     std::vector<GameObject*> sceneObjects;
-	std::vector<Mesh*> meshes;
+    std::vector<Mesh*> meshes;
 
-    //Systemas separados
     WindowManager* windowManager;
     Renderer renderer;
     Camera camera;
-	OBJLoader objLoader;
+    OBJLoader objLoader;
+    TextureLoader textureLoader;
+
+    // IDs de texturas cargadas en GPU
+    GLuint trollTexID = 0;
+    GLuint rockTexID = 0;
 
     void Run();
 

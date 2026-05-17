@@ -7,12 +7,17 @@
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
 
+// PASO 3 (guia): constantes de tint con nombres descriptivos
+static const glm::vec4 TINT_TROLL_GREEN = glm::vec4(0.4f, 1.0f, 0.4f, 1.0f);
+static const glm::vec4 TINT_TROLL_BLUE  = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+static const glm::vec4 TINT_TROLL_TEAL  = glm::vec4(0.4f, 0.9f, 0.8f, 1.0f);
+static const glm::vec4 TINT_ROCK_NORMAL = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+static const glm::vec4 TINT_CLOUD       = glm::vec4(1.2f, 1.2f, 1.2f, 1.0f);
+
 void Game::Run()
 {
     Init();
-
-	RunLoop();
-
+    RunLoop();
     Stop();
 }
 
@@ -56,35 +61,58 @@ void Game::Init()
 	//Activamos el Input Manager con la ventana que hemos creado
     IM->Init(windowManager->window);
 
-    // Crear shader para el Troll
-    ShaderProgram* trollShader = new ShaderProgram("CubeVertexShader.glsl", "CubeGeometryShader.glsl", "CubeFragmentShader.glsl");
-    compiledPrograms.push_back(trollShader->programId);
+    // cargar texturas tras inicializar el contexto OpenGL
+    trollTexID = textureLoader.Load("Assets/Texturas/troll.png");
+    rockTexID = textureLoader.Load("Assets/Texturas/rock.png");
 
-    // Create camera
-    Camera camera;
-    camera.transform.position = glm::vec3(0.f, 0.5f, 4.f);
-    camera.transform.rotation = glm::vec3(0.f, 0.f, -50.f);
-
-    //Compilar shaders
-    ShaderProgram* cubeProgram = new ShaderProgram("CubeVertexShader.glsl", "CubeGeometryShader.glsl", "CubeFragmentShader.glsl");
-
-    compiledPrograms.push_back(cubeProgram->programId);
-
-
-    // Cargar mesh del Troll
+        //// Create camera
+        //Camera camera;
+        //camera.transform.position = glm::vec3(0.f, 0.5f, 4.f);
+        //camera.transform.rotation = glm::vec3(0.f, 0.f, -50.f);
+    // Cargar mallas (reutilizar en todas sus instancias)
     Mesh* trollMesh = objLoader.LoadOBJMesh("Assets/Modelos/troll.obj");
     meshes.push_back(trollMesh);
+    Mesh* rockMesh = objLoader.LoadOBJMesh("Assets/Modelos/rock.obj");
+    meshes.push_back(rockMesh);
 
-    // Crear el Troll GameObject
-    GameObject* troll = CreateGameObject(trollMesh, "CubeVertexShader.glsl", "CubeGeometryShader.glsl", "CubeFragmentShader.glsl");
+    // Crear GameObjects (asignar tints y texturas tmb)
+    // --- Troll izquierdo (verde) ---
+    GameObject* trollLeft = CreateGameObject(trollMesh, "CubeVertexShader.glsl", "CubeGeometryShader.glsl", "CubeFragmentShader.glsl");
+    trollLeft->transform.position = glm::vec3(-3.f, 0.f, 0.f);
+    trollLeft->tint = TINT_TROLL_GREEN;
+    trollLeft->texID = trollTexID;
 
-    //Crear mesh de roca
-	Mesh* rockMesh = objLoader.LoadOBJMesh("Assets/Modelos/rock.obj");
-	meshes.push_back(rockMesh);
+    // --- Troll central (azul/original) ---
+    GameObject* trollCenter = CreateGameObject(trollMesh, "CubeVertexShader.glsl", "CubeGeometryShader.glsl", "CubeFragmentShader.glsl");
+    trollCenter->transform.position = glm::vec3(0.f, 0.f, 0.f);
+    trollCenter->tint = TINT_TROLL_BLUE;
+    trollCenter->texID = trollTexID;
+
+    // --- Troll derecho (verde-azulado) ---
+    GameObject* trollRight = CreateGameObject(trollMesh, "CubeVertexShader.glsl", "CubeGeometryShader.glsl", "CubeFragmentShader.glsl");
+    trollRight->transform.position = glm::vec3(3.f, 0.f, 0.f);
+    trollRight->tint = TINT_TROLL_TEAL;
+    trollRight->texID = trollTexID;
     
-	//Crear el GameObject de la roca
-	GameObject* rock = CreateGameObject(rockMesh, "CubeVertexShader.glsl", "CubeGeometryShader.glsl", "CubeFragmentShader.glsl");
-	rock->transform.position = glm::vec3(2.f, 0.f, 0.f);
+    // --- Roca suelo og ---
+    GameObject* rock = CreateGameObject(rockMesh, "CubeVertexShader.glsl", "CubeGeometryShader.glsl", "CubeFragmentShader.glsl");
+    rock->transform.position = glm::vec3(0.f, -1.f, -2.f);
+    rock->tint = TINT_ROCK_NORMAL;
+    rock->texID = rockTexID;
+
+    // --- Nube izquierda (flying rock deformada) ---
+    GameObject* cloudLeft = CreateGameObject(rockMesh, "CubeVertexShader.glsl", "CubeGeometryShader.glsl", "CubeFragmentShader.glsl");
+    cloudLeft->transform.position = glm::vec3(-2.f, 5.f, -4.f);
+    cloudLeft->transform.scale = glm::vec3(2.0f, 0.5f, 1.0f);
+    cloudLeft->tint = TINT_CLOUD;
+    cloudLeft->texID = rockTexID;
+
+    // --- Nube derecha ---
+    GameObject* cloudRight = CreateGameObject(rockMesh, "CubeVertexShader.glsl", "CubeGeometryShader.glsl", "CubeFragmentShader.glsl");
+    cloudRight->transform.position = glm::vec3(3.f, 5.f, -4.f);
+    cloudRight->transform.scale = glm::vec3(1.5f, 0.4f, 1.0f);
+    cloudRight->tint = TINT_CLOUD;
+    cloudRight->texID = rockTexID;
 
     // Crear el Suelo
     CreateFloor();
@@ -107,7 +135,7 @@ void Game::Update()
     static bool showWireframe = false;
 
     // actualizar las matrizes de la camara
-    camera.DollyZoom(glm::vec3(0,-3.f,3));
+    camera.DollyZoom(glm::vec3(0, -3.f, 3));
 
     for (size_t i = 0; i < compiledPrograms.size(); i++)
     {
@@ -143,12 +171,14 @@ void Game::Update()
 
 void Game::Render()
 {
+    // limpiar color y depth buffer para evitar z-fighting
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-	//Renderizar meshes de la escena
+    // renderizar cada instancia con su textura y tint propios
     for (GameObject* obj : sceneObjects)
     {
-        renderer.RenderObject(*obj, *obj->mesh, obj->shaderProgram->programId, obj->mesh->GetVertexCount());
+        renderer.RenderObject(*obj, *obj->mesh, obj->shaderProgram->programId,
+                              obj->mesh->GetVertexCount(), obj->texID, obj->tint);
     }
 
     //Cambiamos buffers
@@ -158,6 +188,10 @@ void Game::Render()
 
 void Game::Stop()
 {
+    // liberar texturas al cerrar
+    glDeleteTextures(1, &trollTexID);
+    glDeleteTextures(1, &rockTexID);
+
     for (GameObject* obj : sceneObjects)
         delete obj;
 
@@ -188,6 +222,8 @@ void Game::CreateFloor()
     floor->transform.position = glm::vec3(0.f, 0.0f, 0.f);
     floor->transform.rotation = glm::vec3(90.f, 0.f, 0.f);
     floor->transform.scale = glm::vec3(3.f, 3.f, 3.f);
+    floor->tint = TINT_ROCK_NORMAL;
+    floor->texID = rockTexID;
 }
 
 GameObject* Game::CreateGameObject(Mesh* mesh, const char* vertexShader, const char* geometryShader, const char* fragmentShader)
