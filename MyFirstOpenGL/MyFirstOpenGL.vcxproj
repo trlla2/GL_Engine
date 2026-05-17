@@ -21,14 +21,17 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="FileLoader.cpp" />
+    <ClCompile Include="Game.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="OBJLoader.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="ShaderLoaders.cpp" />
     <ClCompile Include="ShaderProgram.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="stb.cpp" />
     <ClCompile Include="TimeManager.cpp" />
+    <ClCompile Include="WindowManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="CubeFragmentShader.glsl" />
@@ -44,13 +47,16 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="FileLoader.h" />
+    <ClInclude Include="Game.h" />
     <ClInclude Include="GameObjects.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="OBJLoader.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="ShaderLoaders.h" />
     <ClInclude Include="ShaderProgram.h" />
     <ClInclude Include="TimeManager.h" />
+    <ClInclude Include="WindowManager.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="guia_texturas_opengl.txt" />
