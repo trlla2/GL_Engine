@@ -3,7 +3,6 @@
 
 Mesh::Mesh(const std::vector<float>& vertices, const std::vector<float>& uvs, const std::vector<float>& normals) : vertexCount(vertices.size() / 3), vboUVs(0), vboNormals(0)
 {
-
     //Almaceno la cantidad de vertices que habra
     this->vertexCount = vertices.size() / 3;
 
@@ -22,10 +21,19 @@ Mesh::Mesh(const std::vector<float>& vertices, const std::vector<float>& uvs, co
     //Activamos el atributo 0 (posiciones por defecto)
     glEnableVertexAttribArray(0);
 
+    // Registrar UVs en location 1
+    if (!uvs.empty())
+    {
+        glGenBuffers(1, &this->vboUVs);
+        glBindBuffer(GL_ARRAY_BUFFER, this->vboUVs);
+        glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(float), uvs.data(), GL_STATIC_DRAW);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(1);
+    }
+
     //Desvinculamos VAO y VBO
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-
 }
 
 Mesh::~Mesh()

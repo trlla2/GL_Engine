@@ -18,18 +18,25 @@ glm::mat4 GenerateScaleMatrix(glm::vec3 scaleAxis) {
     return glm::scale(glm::mat4(1.0f), scaleAxis);
 }
 
-
-void Renderer::RenderObject(const GameObject& obj, const Mesh& mesh, GLuint programId, int vertexCount)
+void Renderer::RenderObject(const GameObject& obj, const Mesh& mesh, GLuint programId, int vertexCount, GLuint texID, glm::vec4 tint)
 {
-    //Indicar a la tarjeta GPU que programa debe usar
+    //Indicar a la GPU que programa debe usar
     glUseProgram(programId);
+
+    // vincular textura en unit 0
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texID);
+    glUniform1i(glGetUniformLocation(programId, "uTexture"), 0);
+
+	// enviar tint multiplier al shader
+    glUniform4f(glGetUniformLocation(programId, "uTint"),
+                tint.r, tint.g, tint.b, tint.a);
 
     glm::mat4 translationMatrix = GenerateTranslationMatrix(obj.transform.position);
     glm::mat4 rotationMatrix = glm::mat4(1.0f);
     if (glm::length(obj.transform.rotation) > 0.0001f) {
         rotationMatrix = GenerateRotationMatrix(obj.transform.rotation, glm::length(obj.transform.rotation));
     }
-    
     glm::mat4 scaleMatrix = GenerateScaleMatrix(obj.transform.scale);
 
     // Pasar matrices al shader

@@ -8,6 +8,8 @@
 #include <sstream>
 #include <fstream>
 #include <vector>
+#include <stb_image.h>
+
 #include "InputManager.h"
 #include "TimeManager.h"
 #include "ShaderProgram.h"
@@ -15,6 +17,7 @@
 #include "Mesh.h"
 #include "GameObjects.h"
 #include "Camera.h"
+
 
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
@@ -33,6 +36,35 @@ void Resize_Window(GLFWwindow* window, int iFrameBufferWidth, int iFrameBufferHe
 	}
 }
 
+GLuint loadTexture(const char* path)
+{
+	GLuint texID;
+	glGenTextures(1, &texID);
+	glBindTexture(GL_TEXTURE_2D, texID);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	int width, height, channels;
+	stbi_set_flip_vertically_on_load(true); // OpenGL tiene la Y invertida
+	unsigned char* data = stbi_load(path, &width, &height, &channels, 0);
+
+	if (data)
+	{
+		GLenum format = (channels == 4) ? GL_RGBA : GL_RGB;
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cerr << "Error: no se pudo cargar la textura: " << path << std::endl;
+	}
+
+	stbi_image_free(data);
+	return texID;
+}
 #pragma region IA Prompt
 //Propt a la IA:
 /*
@@ -400,7 +432,7 @@ void main()
 			}
 
 			// Renderizar mesh
-			renderer.RenderObject(*troll, *troll->mesh, troll->shaderProgram->programId, troll->mesh->GetVertexCount());
+			renderer.RenderObject(*troll, *troll->mesh, troll->shaderProgram->programId, troll->mesh->GetVertexCount(), loadTexture("Assets/Texturas/troll.png"), glm::vec4(0.f, 0.f, 0.f, 0.f));
 			//Cambiamos buffers
 			glFlush();
 			glfwSwapBuffers(window);

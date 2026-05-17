@@ -16,6 +16,7 @@ class GameObject {
 
 public:
 	Transform transform;
+	glm::vec4 tint = glm::vec4(1.f, 1.f, 1.f, 1.f); // color multiplier (tint)
 
 	Mesh* mesh;
 	ShaderProgram* shaderProgram;
@@ -30,4 +31,8 @@ public:
 class Troll : public GameObject {
 public:
 	Troll(Mesh* mesh, ShaderProgram* shaderProgram) : GameObject(mesh, shaderProgram) {}
+};
+class Rock : public GameObject {
+public:
+	Rock(Mesh* mesh, ShaderProgram* shaderProgram) : GameObject(mesh, shaderProgram) {}
 };
