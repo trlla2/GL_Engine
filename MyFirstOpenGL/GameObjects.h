@@ -22,11 +22,6 @@ public:
     ShaderProgram* shaderProgram;
 
     GameObject(Mesh* mesh, ShaderProgram* shaderProgram) : mesh(mesh), shaderProgram(shaderProgram) {}
-    ~GameObject()
-    {
-        delete mesh;
-        delete shaderProgram;
-    }
 };
 
 class Troll : public GameObject {

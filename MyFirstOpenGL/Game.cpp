@@ -75,7 +75,8 @@ void Game::Init()
     Mesh* rockMesh = objLoader.LoadOBJMesh("Assets/Modelos/rock.obj");
     meshes.push_back(rockMesh);
 
-    // Crear GameObjects (asignar tints y texturas tmb)
+    // Crear GameObjects (asignar tints y texturas)
+    // Prompt IA: Crea los objetos necesarios que salen en el documento adjunto
     // --- Troll izquierdo (verde) ---
     GameObject* trollLeft = CreateGameObject(trollMesh, "CubeVertexShader.glsl", "CubeGeometryShader.glsl", "CubeFragmentShader.glsl");
     trollLeft->transform.position = glm::vec3(-3.f, 0.f, 0.f);
@@ -96,7 +97,7 @@ void Game::Init()
     
     // --- Roca suelo og ---
     GameObject* rock = CreateGameObject(rockMesh, "CubeVertexShader.glsl", "CubeGeometryShader.glsl", "CubeFragmentShader.glsl");
-    rock->transform.position = glm::vec3(0.f, -1.f, -2.f);
+    rock->transform.position = glm::vec3(0.f, .5f, -2.f);
     rock->tint = TINT_ROCK_NORMAL;
     rock->texID = rockTexID;
 
@@ -132,10 +133,8 @@ void Game::Init()
 
 void Game::Update()
 {
-    static bool showWireframe = false;
 
     // actualizar las matrizes de la camara
-    camera.DollyZoom(glm::vec3(0, -3.f, 3));
 
     for (size_t i = 0; i < compiledPrograms.size(); i++)
     {
@@ -145,28 +144,24 @@ void Game::Update()
     //INPUT 
     if (IM->GetEventKey(GLFW_KEY_1, KeyState::DOWN))
     {
-        showWireframe = !showWireframe;
-        glPolygonMode(GL_FRONT_AND_BACK, showWireframe ? GL_LINE : GL_FILL);
-    }
+		camera.mode = STATIC;
+        camera.targetPosition = glm::vec3(-3.f, 0.f, 0.f);
 
-    if (IM->GetEventKey(GLFW_KEY_SPACE, KeyState::DOWN))
+        camera.transform.position = camera.targetPosition + glm::vec3(0.f, 1.2f, 4.0f);
+    }
+    if (IM->GetEventKey(GLFW_KEY_2, KeyState::DOWN))
     {
-        if (TM->GetScaleTime() != 0.f)
-            TM->SetScaleTime(0.f);
-        else
-            TM->SetScaleTime(1.f);
+        camera.mode = STATIC;
+        camera.targetPosition = glm::vec3(3.f, 0.f, 0.f);
+        camera.transform.position = camera.targetPosition + glm::vec3(0.f, 1.0f, 1.2f);
     }
-
-    if (IM->GetEventKey(GLFW_KEY_M, KeyState::DOWN))
+    if (IM->GetEventKey(GLFW_KEY_3, KeyState::DOWN))
     {
-        TM->SetScaleTime(TM->GetScaleTime() + 0.1f);
-    }
+        camera.mode = DOLLY_ZOOM;
+		camera.targetPosition = glm::vec3(0.f, 0.f, 0.f);
 
-    if (IM->GetEventKey(GLFW_KEY_N, KeyState::DOWN))
-    {
-        TM->SetScaleTime(TM->GetScaleTime() - 0.1f);
+        camera.transform.position = camera.targetPosition + glm::vec3(0.f, 1.0f, 5.0f);
     }
-
 }
 
 void Game::Render()
