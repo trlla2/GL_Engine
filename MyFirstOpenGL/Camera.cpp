@@ -91,6 +91,8 @@ void Camera::DollyZoom(glm::vec3 pos, float startDegrees, float finishDegrees)
         transform.position = dollyTarget + dir * newDist;
 
         fFov = targetFov;
+
+        lookAtPoint = dollyTarget + glm::vec3(0.f, 1.0f, 0.f);
         if (dollyZoomTimer >= dollyZoomDuration)
         {
             dollyZoomActive = false;
