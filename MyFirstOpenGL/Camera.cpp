@@ -64,6 +64,11 @@ void Camera::Update(GLuint* compiledProgram, int const windowWidth, int const wi
     glUseProgram(0);
 }
 
+glm::vec3 Camera::GetForwardVector()
+{
+    return glm::normalize(lookAtPoint - transform.position);
+}
+
 void Camera::RotateOnPosition(glm::vec3 pos, float distance)
 {
     static float angle = 0.f;

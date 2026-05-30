@@ -20,6 +20,7 @@ public:
 
 
 	void Update(GLuint* compiledProgram, int const windowWidth, int const windowHeight);
+	glm::vec3 GetForwardVector();
 
 	void RotateOnPosition(glm::vec3 pos, float distance = 4.f);
 
@@ -27,7 +28,8 @@ public:
 
 private:
 	glm::vec3 localVectorUp = glm::vec3(0.f, 1.f, 0.f);
-	glm::vec3 lookAtPoint = glm::vec3(0.f);  // Punto al que mira la cámara
+	glm::vec3 lookAtPoint = glm::vec3(0.f);
+
 	float fFov = 45.f;
 
 	float dollyZoomTimer = 0.f;        
