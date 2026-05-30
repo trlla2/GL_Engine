@@ -2,18 +2,14 @@
 
 layout(location = 0) in vec3 posicion;
 layout(location = 1) in vec2 aTexCoord; // coordenadas UV del modelo
+layout(location = 2) in vec3 aNormal; // normales del modelo
 
-uniform mat4 translationMatrix;
-uniform mat4 rotationMatrix;
-uniform mat4 scaleMatrix;
-uniform mat4 viewMatrix;
-uniform mat4 projectionMatrix;
 
 out vec2 vTexCoord; // se propaga al geometry shader
-
+out vec3 vNormal; // se propaga al geometry shader
 void main()
 {
-    mat4 model = translationMatrix * rotationMatrix * scaleMatrix;
-    gl_Position = projectionMatrix * viewMatrix * model * vec4(posicion, 1.0);
+    vNormal   = aNormal;
+    gl_Position = vec4(posicion, 1.0);
     vTexCoord = aTexCoord;
 }

@@ -2,6 +2,7 @@
 #include <vector>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <glm.hpp>
 #include "Mesh.h"
 #include "Camera.h"
 #include "Renderer.h"
@@ -30,6 +31,11 @@ public:
     void Run();
 
 private:
+    // Lighting constants
+    const float AmbientStrength = 0.15f;
+    const glm::vec3 LigthSource = glm::vec3(0.0f, 0.0f, 1.0f);
+    const glm::vec3 LigthColor = glm::vec3( 1.0f,  1.0f,  1.0f);
+
     void Init();
     void RunLoop();
     void Update();
