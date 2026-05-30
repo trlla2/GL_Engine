@@ -76,7 +76,6 @@ void Camera::RotateOnPosition(glm::vec3 pos, float distance)
 
     if (angle > 360.f)
         angle = 0.f;
-    std::cout << "Camera angle: " << angle << std::endl;
     // Calcular nueva posicion 
     transform.position.x = pos.x + distance * glm::cos(glm::radians(angle));
     transform.position.z = pos.z + distance * glm::sin(glm::radians(angle));

@@ -137,10 +137,14 @@ void Game::Init()
 void Game::Update()
 {
 
-    // actualizar las matrizes de la camara
+    // el toggle se procesa una vez por frame, fuera del bucle
+    flashlight.HandleInput();
+
+    // actualizar las matrizes de la camara y flaslight
     for (size_t i = 0; i < compiledPrograms.size(); i++)
     {
         camera.Update(&compiledPrograms[i], WINDOW_WIDTH, WINDOW_HEIGHT);
+        flashlight.Update(&compiledPrograms[i], camera.transform.position, camera.GetForwardVector());
     }
 }
 
