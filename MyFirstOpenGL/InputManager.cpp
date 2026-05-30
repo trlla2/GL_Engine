@@ -14,7 +14,7 @@ bool InputManager::Listen()
 		return false;
 	}
 
-	for (int i = 32; i <= GLFW_KEY_LAST; i++)
+	for (int i = GLFW_KEY_SPACE; i <= GLFW_KEY_LAST; i++)
 	{
 		previousKeys[i] = currentKeys[i];
 		currentKeys[i] = glfwGetKey(currentWindow, i) == GLFW_PRESS;
@@ -25,7 +25,7 @@ bool InputManager::Listen()
 
 bool InputManager::GetEventKey(int key, KeyState event)
 {
-	if (key < 32 || key > GLFW_KEY_LAST)
+	if (key < GLFW_KEY_SPACE || key > GLFW_KEY_LAST)
 	{
 		std::cerr << "INPUT MANAGER: key out of range" << std::endl;
 		return false;

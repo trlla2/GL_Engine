@@ -7,12 +7,11 @@
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
 
-// PASO 3 (guia): constantes de tint con nombres descriptivos
-static const glm::vec4 TINT_TROLL_GREEN = glm::vec4(0.4f, 1.0f, 0.4f, 1.0f);
-static const glm::vec4 TINT_TROLL_BLUE  = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-static const glm::vec4 TINT_TROLL_TEAL  = glm::vec4(0.4f, 0.9f, 0.8f, 1.0f);
-static const glm::vec4 TINT_ROCK_NORMAL = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-static const glm::vec4 TINT_CLOUD       = glm::vec4(1.2f, 1.2f, 1.2f, 1.0f);
+const glm::vec4 TINT_TROLL_GREEN = glm::vec4(0.4f, 1.0f, 0.4f, 1.0f);
+const glm::vec4 TINT_TROLL_BLUE  = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+const glm::vec4 TINT_TROLL_TEAL  = glm::vec4(0.4f, 0.9f, 0.8f, 1.0f);
+const glm::vec4 TINT_ROCK_NORMAL = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+const glm::vec4 TINT_CLOUD       = glm::vec4(1.2f, 1.2f, 1.2f, 1.0f);
 
 void Game::Run()
 {
@@ -115,9 +114,6 @@ void Game::Init()
     cloudRight->tint = TINT_CLOUD;
     cloudRight->texID = rockTexID;
 
-    // Crear el Suelo
-    CreateFloor();
-
     //Definimos color para limpiar el buffer de color
     renderer.SetClearColor(0.f, 0.f, 0.f, 1.f);
 
@@ -135,32 +131,9 @@ void Game::Update()
 {
 
     // actualizar las matrizes de la camara
-
     for (size_t i = 0; i < compiledPrograms.size(); i++)
     {
         camera.Update(&compiledPrograms[i], WINDOW_WIDTH, WINDOW_HEIGHT);
-    }
-
-    //INPUT 
-    if (IM->GetEventKey(GLFW_KEY_1, KeyState::DOWN))
-    {
-		camera.mode = STATIC;
-        camera.targetPosition = glm::vec3(-3.f, 0.f, 0.f);
-
-        camera.transform.position = camera.targetPosition + glm::vec3(0.f, 1.2f, 4.0f);
-    }
-    if (IM->GetEventKey(GLFW_KEY_2, KeyState::DOWN))
-    {
-        camera.mode = STATIC;
-        camera.targetPosition = glm::vec3(3.f, 0.f, 0.f);
-        camera.transform.position = camera.targetPosition + glm::vec3(0.f, 1.0f, 1.2f);
-    }
-    if (IM->GetEventKey(GLFW_KEY_3, KeyState::DOWN))
-    {
-        camera.mode = DOLLY_ZOOM;
-		camera.targetPosition = glm::vec3(0.f, 0.f, 0.f);
-
-        camera.transform.position = camera.targetPosition + glm::vec3(0.f, 1.0f, 5.0f);
     }
 }
 
@@ -192,33 +165,6 @@ void Game::Stop()
 
     sceneObjects.clear();
     glfwTerminate();
-}
-
-void Game::CreateFloor()
-{
-    	//Ia propmts: crea un suelo simple con dos triangulos usando vertices
-    std::vector<float> floorVertices = {
-		//trangulo 1
-         0.5f, -0.5f, 0.0f,
-        -0.5f, -0.5f, 0.0f,
-        -0.5f,  0.5f, 0.0f,
-        //triangulo 2
-         0.5f,  0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f,
-        -0.5f,  0.5f, 0.0f,
-    };
-
-	//Crear mesh del suelo y poner en array
-    Mesh* floorMesh = new Mesh(floorVertices, {}, {});
-    meshes.push_back(floorMesh);
-
-	//Crear el GameObject del suelo y poner en array
-    GameObject* floor = CreateGameObject(floorMesh, "CubeVertexShader.glsl", "CubeGeometryShader.glsl", "CubeFragmentShader.glsl");
-    floor->transform.position = glm::vec3(0.f, 0.0f, 0.f);
-    floor->transform.rotation = glm::vec3(90.f, 0.f, 0.f);
-    floor->transform.scale = glm::vec3(3.f, 3.f, 3.f);
-    floor->tint = TINT_ROCK_NORMAL;
-    floor->texID = rockTexID;
 }
 
 GameObject* Game::CreateGameObject(Mesh* mesh, const char* vertexShader, const char* geometryShader, const char* fragmentShader)
