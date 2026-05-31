@@ -58,7 +58,7 @@ void main()
         //luna
         vec3 MoonDirection = normalize(uMoonDirection);
         float MoonLightAngle = max(dot(normal, MoonDirection), 0.15);
-        vec3 moonDiffuse = SunLightAngle * uSunColor;
+        vec3 moonDiffuse = MoonLightAngle * uMoonColor;
 
         vec3 ambient = ambientStrength * lightColor;
         //calculamos el diffuse total

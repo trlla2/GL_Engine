@@ -144,11 +144,8 @@ void Game::Init()
         glUseProgram(compiledPrograms[i]);
         glUniform2f(glGetUniformLocation(compiledPrograms[i], "windowSize"), WINDOW_WIDTH, WINDOW_HEIGHT);
 
-        // Directional light
-        glUniform3f(glGetUniformLocation(compiledPrograms[i], "ligthSource"), LigthSource.x, LigthSource.y, LigthSource.z);
-        glUniform3f(glGetUniformLocation(compiledPrograms[i], "lightColor"),     LigthColor.x,     LigthColor.y,     LigthColor.z);
-
         // Ambient light
+        glUniform3f(glGetUniformLocation(compiledPrograms[i], "lightColor"),     LigthColor.x,     LigthColor.y,     LigthColor.z);
         glUniform1f(glGetUniformLocation(compiledPrograms[i], "ambientStrength"), AmbientStrength);
     }
 }
