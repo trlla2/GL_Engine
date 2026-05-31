@@ -30,6 +30,10 @@ public:
     GLuint trollTexID = 0;
     GLuint rockTexID = 0;
 
+	//Referencias a los modelos de sol y luna (siempre presenter asi que podemos poner en el game en sí)
+    GameObject* SunGO = nullptr;
+    GameObject* MoonGO = nullptr;
+
     void Run();
 
 private:
