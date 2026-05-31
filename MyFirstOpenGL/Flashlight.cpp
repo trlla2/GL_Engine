@@ -4,9 +4,7 @@
 void Flashlight::HandleInput()
 {
 	if (IM->GetEventKey(GLFW_KEY_F, KeyState::DOWN))
-	{
 		active = !active;
-	}
 }
 
 void Flashlight::Update(GLuint* compiledProgram, glm::vec3 position, glm::vec3 forwardDirection)

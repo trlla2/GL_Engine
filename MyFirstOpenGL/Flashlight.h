@@ -4,7 +4,7 @@
 class Flashlight
 {
 public:
-	glm::vec3 color = glm::vec3(1.f, 1.f, 1.f);
+	glm::vec3 color = glm::vec3(1.f, 1.f, 0.5f);
 	float intensity = 4.f;
 	float range = 30.f;
 	
