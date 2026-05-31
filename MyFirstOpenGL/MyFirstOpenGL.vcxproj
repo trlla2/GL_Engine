@@ -39,12 +39,6 @@
     <None Include="CubeFragmentShader.glsl" />
     <None Include="CubeGeometryShader.glsl" />
     <None Include="CubeVertexShader.glsl" />
-    <None Include="PyramidFragmentShader.glsl" />
-    <None Include="PyramidGeometryShader.glsl" />
-    <None Include="PyramidVertexShader.glsl" />
-    <None Include="RectFragmentShader.glsl" />
-    <None Include="RectGeometryShader.glsl" />
-    <None Include="RectVertexShader.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
