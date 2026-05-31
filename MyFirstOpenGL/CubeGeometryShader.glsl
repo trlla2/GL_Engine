@@ -27,6 +27,7 @@ void main()
 
     for (int i = 0; i < gl_in.length(); i++)
     {
+
         gl_Position = projectionMatrix * viewMatrix * model * gl_in[i].gl_Position;
         gTexCoord   = vTexCoord[i];
         gNormal     = mat3(rotationMatrix) * vNormal[i];

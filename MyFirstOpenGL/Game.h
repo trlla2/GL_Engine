@@ -10,6 +10,7 @@
 #include "GameObjects.h"
 #include "OBJLoader.h"
 #include "TextureLoader.h"
+#include "Flashlight.h"
 
 class Game
 {
@@ -21,6 +22,7 @@ public:
     WindowManager* windowManager;
     Renderer renderer;
     Camera camera;
+	Flashlight flashlight;
     OBJLoader objLoader;
     TextureLoader textureLoader;
 
