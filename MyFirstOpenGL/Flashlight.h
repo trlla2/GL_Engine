@@ -12,7 +12,6 @@ public:
 	float innerCutOff = 12.5f;
 	float outerCutOff = 17.5f;
 
-	// detecta la tecla y cambia el estado, se llama una vez por frame
 	void HandleInput();
 	void Update(GLuint* compiledProgram, glm::vec3 position,glm::vec3 forwardDirection);
 
