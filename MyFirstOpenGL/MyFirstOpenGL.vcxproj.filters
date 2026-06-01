@@ -83,24 +83,6 @@
     <None Include="CubeFragmentShader.glsl">
       <Filter>Shaders\Fragment Shader</Filter>
     </None>
-    <None Include="PyramidFragmentShader.glsl">
-      <Filter>Shaders\Fragment Shader</Filter>
-    </None>
-    <None Include="RectFragmentShader.glsl">
-      <Filter>Shaders\Fragment Shader</Filter>
-    </None>
-    <None Include="PyramidGeometryShader.glsl">
-      <Filter>Shaders\Geometry Shader</Filter>
-    </None>
-    <None Include="RectGeometryShader.glsl">
-      <Filter>Shaders\Geometry Shader</Filter>
-    </None>
-    <None Include="PyramidVertexShader.glsl">
-      <Filter>Shaders\Vertex Shader</Filter>
-    </None>
-    <None Include="RectVertexShader.glsl">
-      <Filter>Shaders\Vertex Shader</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="InputManager.h">

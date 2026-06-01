@@ -2,6 +2,7 @@
 #include "ShaderProgram.h"
 #include "InputManager.h"
 #include "TimeManager.h"
+#include <gtc/constants.hpp>
 #include <iostream>
 
 #define WINDOW_WIDTH 640
@@ -64,15 +65,19 @@ void Game::Init()
     trollTexID = textureLoader.Load("Assets/Texturas/troll.png");
     rockTexID = textureLoader.Load("Assets/Texturas/rock.png");
 
-        //// Create camera
-        //Camera camera;
-        //camera.transform.position = glm::vec3(0.f, 0.5f, 4.f);
-        //camera.transform.rotation = glm::vec3(0.f, 0.f, -50.f);
     // Cargar mallas (reutilizar en todas sus instancias)
     Mesh* trollMesh = objLoader.LoadOBJMesh("Assets/Modelos/troll.obj");
     meshes.push_back(trollMesh);
     Mesh* rockMesh = objLoader.LoadOBJMesh("Assets/Modelos/rock.obj");
     meshes.push_back(rockMesh);
+
+    // Cargar mallas para el Sol y la Luna
+    //El mismo modelo pq LOS MODELOS D INTERNER USAN QUADS I NO LO PODEMOS LEER
+    //Sun.obj ha sido 100% generado por mi chatty gpt para q sea copatible con el formato
+    Mesh* sunMesh = objLoader.LoadOBJMesh("Assets/Modelos/Sun.obj");
+    meshes.push_back(sunMesh);
+    Mesh* moonMesh = objLoader.LoadOBJMesh("Assets/Modelos/Sun.obj");
+    meshes.push_back(moonMesh);
 
     // Crear GameObjects (asignar tints y texturas)
     // Prompt IA: Crea los objetos necesarios que salen en el documento adjunto
@@ -114,6 +119,20 @@ void Game::Init()
     cloudRight->tint = TINT_CLOUD;
     cloudRight->texID = rockTexID;
 
+	GameObject* sun = CreateGameObject(sunMesh, "CubeVertexShader.glsl", "CubeGeometryShader.glsl", "CubeFragmentShader.glsl");
+	sun->transform.position = glm::vec3(0.f, 50.f, 0.f);
+	sun->transform.scale = glm::vec3(8.f);
+	sun->enableLighting = false; // El Sol no recibe iluminación
+	sun->texID = 0; // El Sol no tiene textura, solo color
+	SunGO = sun; // Guardar referencia
+
+	GameObject* moon = CreateGameObject(moonMesh, "CubeVertexShader.glsl", "CubeGeometryShader.glsl", "CubeFragmentShader.glsl");
+	moon->transform.position = glm::vec3(0.f, -50.f, 0.f);
+	moon->transform.scale = glm::vec3(2.f);
+	moon->enableLighting = false; // La Luna no recibe iluminación
+	moon->texID = 0; // La Luna no tiene textura, solo color
+	MoonGO = moon; // Guardar referencia
+
     //Definimos color para limpiar el buffer de color
     renderer.SetClearColor(0.f, 0.f, 0.f, 1.f);
 
@@ -125,11 +144,8 @@ void Game::Init()
         glUseProgram(compiledPrograms[i]);
         glUniform2f(glGetUniformLocation(compiledPrograms[i], "windowSize"), WINDOW_WIDTH, WINDOW_HEIGHT);
 
-        // Directional light
-        glUniform3f(glGetUniformLocation(compiledPrograms[i], "ligthSource"), LigthSource.x, LigthSource.y, LigthSource.z);
-        glUniform3f(glGetUniformLocation(compiledPrograms[i], "lightColor"),     LigthColor.x,     LigthColor.y,     LigthColor.z);
-
         // Ambient light
+        glUniform3f(glGetUniformLocation(compiledPrograms[i], "lightColor"),     LigthColor.x,     LigthColor.y,     LigthColor.z);
         glUniform1f(glGetUniformLocation(compiledPrograms[i], "ambientStrength"), AmbientStrength);
     }
 }
@@ -140,11 +156,73 @@ void Game::Update()
     //  una vez por frame
     flashlight.HandleInput();
 
-    // actualizar las matrizes de la camara y flaslight
+	//IA Prompt: Implementa un sistema de día y noche que haga orbitar al sol y la luna alrededor del punto 0,0,0 , cambiando sus posiciones, colores e intensidades de luz, y el color ambiental para simular el paso del tiempo. El ciclo completo debe durar 20 segundos.
+    //Cálculos de la mecánica orbital (Duración del ciclo = 20 segundos)
+    float time = TM->GetGlobalTime();
+    float cycleDuration = 20.0f;
+	float angle = (time / cycleDuration) * 2.0f * glm::pi<float>(); // angulo = delta * 2PI
+
+    //Radio de la órbita alrededor de (0,0,0)
+    float orbitRadius = 50.0f;
+
+    // Posición del Sol y la Luna (órbita vertical en el plano Y-Z)
+    glm::vec3 sunPos = glm::vec3(0.0f, orbitRadius * sin(angle), orbitRadius * cos(angle));
+    //Luna siempre a 180° del Sol (+ PI)
+    glm::vec3 moonPos = glm::vec3(0.0f, orbitRadius * sin(angle + glm::pi<float>()), orbitRadius * cos(angle + glm::pi<float>()));
+
+    // Actualizar posiciones de los GameObjects orbitales
+    if (SunGO != nullptr) {
+        SunGO->transform.position = sunPos;
+    }
+    if (MoonGO != nullptr) {
+        MoonGO->transform.position = moonPos;
+    }
+
+    //2.Cálculo de Direcciones e Intensidades de Luz
+    glm::vec3 sunDirection = glm::normalize(sunPos - glm::vec3(0,0,0));
+    glm::vec3 moonDirection = glm::normalize(moonPos - glm::vec3(0,0,0));
+
+    //Si están bajo del suelo (Y <= 0), dejan de emitir luz
+    glm::vec3 sunColor = glm::vec3(0.0f);
+    if (sunPos.y > 0.0f) {
+        sunColor = glm::vec3(1.0f, 0.95f, 0.85f); // Sol: Luz fuerte y cálida
+    }
+
+    glm::vec3 moonColor = glm::vec3(0.0f);
+    if (moonPos.y > 0.0f) {
+        moonColor = glm::vec3(0.15f, 0.22f, 0.35f); // Luna: Luz tenue y fría
+    }
+
+    // 3. Interpolación de ambient ligth
+    // t va de 0.0 (medianoche) a 1.0 (mediodía) basado en el seno del ángulo orbital del sol
+    float t = (sin(angle) + 1.0f) * 0.5f;
+    glm::vec3 midnightAmbient = glm::vec3(0.02f, 0.02f, 0.09f); // Azul oscuro
+    glm::vec3 middayAmbient = glm::vec3(0.22f, 0.20f, 0.12f);    // Color amarillentos
+    glm::vec3 ambientColor = glm::mix(midnightAmbient, middayAmbient, t);
+    float currentAmbientStrength = glm::mix(0.05f, AmbientStrength, t);
+
+    // Actualizar el color de fondo para fundirse de día a noche
+    renderer.SetClearColor(ambientColor.r, ambientColor.g, ambientColor.b, 1.0f);
+
+
+
+    // actualizar las matrizes de la camara, ambient,  y flaslight
     for (size_t i = 0; i < compiledPrograms.size(); i++)
     {
         camera.Update(&compiledPrograms[i], WINDOW_WIDTH, WINDOW_HEIGHT);
         flashlight.Update(&compiledPrograms[i], camera.transform.position, camera.GetForwardVector());
+
+        glUseProgram(compiledPrograms[i]);
+
+        // Enviar parámetros direccionales y ambientales
+        glUniform3f(glGetUniformLocation(compiledPrograms[i], "uSunDirection"), sunDirection.x, sunDirection.y, sunDirection.z);
+        glUniform3f(glGetUniformLocation(compiledPrograms[i], "uSunColor"), sunColor.x, sunColor.y, sunColor.z);
+
+        glUniform3f(glGetUniformLocation(compiledPrograms[i], "uMoonDirection"), moonDirection.x, moonDirection.y, moonDirection.z);
+        glUniform3f(glGetUniformLocation(compiledPrograms[i], "uMoonColor"), moonColor.x, moonColor.y, moonColor.z);
+
+        glUniform3f(glGetUniformLocation(compiledPrograms[i], "lightColor"), ambientColor.x, ambientColor.y, ambientColor.z);
+        glUniform1f(glGetUniformLocation(compiledPrograms[i], "ambientStrength"), currentAmbientStrength);
     }
 }
 
