@@ -25,6 +25,8 @@ uniform vec3 uMoonColor;
 uniform vec3 lightColor;
 uniform float ambientStrength;
 
+
+// AI PROMPT(con contexto de este script ): dime que valores pondrias para hacer una flashlight 
 // Spotlight
 uniform vec3 spotlightPos;
 uniform vec3 spotlightDir;
