@@ -4,6 +4,8 @@
 class Camera
 {
 public:
+	Camera();
+
 	Transform transform;
 	float fNear = 0.1f;
 	float fFar = 100.f;
@@ -16,4 +18,9 @@ private:
 	glm::vec3 lookAtPoint = glm::vec3(0.f, 1.f, 0.f);
 
 	float fFov = 45.f;
+
+	float yaw = -90.f;   
+	float pitch = 0.f; 
+	float mouseSensitivity = 0.025f;
+	float moveSpeed = 1.5f;
 };

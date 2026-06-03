@@ -17,6 +17,8 @@ public:
 	void Init(GLFWwindow* window);
 	bool Listen();
 	bool GetEventKey(int key, KeyState event);
+	double GetMouseDeltaX();
+	double GetMouseDeltaY();
 
 private:
 	InputManager() = default;
@@ -32,4 +34,9 @@ private:
 	
 	bool currentKeys[GLFW_KEY_LAST + 1] = { false };
 	bool previousKeys[GLFW_KEY_LAST + 1] = { false };
+
+	// AI PROMPT: "Como obtener el input de un mouse en OpenGL", despues: "Implementa un metodo que de mouseX y mouseY"
+	double mouseX = 0.0, mouseY = 0.0;
+	double mouseDeltaX = 0.0, mouseDeltaY = 0.0;
+	bool firstMouse = true;
 };

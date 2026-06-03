@@ -4,6 +4,8 @@
 void InputManager::Init(GLFWwindow* window)
 {
 	currentWindow = window;
+	// capturar el cursor para el control de camara
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
 bool InputManager::Listen()
@@ -20,7 +22,31 @@ bool InputManager::Listen()
 		currentKeys[i] = glfwGetKey(currentWindow, i) == GLFW_PRESS;
 	}
 
+	// calculamar cuanto se ha movido el raton este frame
+	double newX, newY;
+	glfwGetCursorPos(currentWindow, &newX, &newY);
+	if (firstMouse)
+	{
+		mouseX = newX;
+		mouseY = newY;
+		firstMouse = false;
+	}
+	mouseDeltaX = newX - mouseX;
+	mouseDeltaY = newY - mouseY;
+	mouseX = newX;
+	mouseY = newY;
+
 	return true;
+}
+
+double InputManager::GetMouseDeltaX()
+{
+	return mouseDeltaX;
+}
+
+double InputManager::GetMouseDeltaY()
+{
+	return mouseDeltaY;
 }
 
 bool InputManager::GetEventKey(int key, KeyState event)
