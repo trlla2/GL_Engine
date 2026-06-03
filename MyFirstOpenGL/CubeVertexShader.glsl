@@ -10,6 +10,6 @@ out vec3 vNormal; // se propaga al geometry shader
 void main()
 {
     vNormal   = aNormal;
-    gl_Position = vec4(posicion, 1.0);
+    gl_Position = vec4(posicion, 1.0); // 
     vTexCoord = aTexCoord;
 }
