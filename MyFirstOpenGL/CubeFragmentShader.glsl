@@ -3,7 +3,7 @@
 // fragment shader con textura y tint multiplicador
 in vec2 gTexCoord; // UVs recibidas del geometry shaders
 in vec3 gNormal; // normales recibidas del geometry shader
-in vec4 gPrimitivePosition;// posici�n del centro del tri�ngulo recibida del geometry shader
+in vec4 gPrimitivePosition;// posici�n del centro del triangulo recibida del geometry shader
 
 out vec4 fragColor;
 
