@@ -6,6 +6,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
+#include <stb_image.h>
 
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
@@ -68,6 +69,43 @@ void Game::Init()
     rockTexID = textureLoader.Load("Assets/Texturas/rock.png");
     // textura compartida por los modelos del spawner
     colormapTexID = textureLoader.Load("Assets/Texturas/colormap.png");
+
+    // Load and read Ambient.png pixels to populate ambientColors
+    {
+        int width = 0, height = 0, channels = 0;
+        stbi_set_flip_vertically_on_load(true);
+        unsigned char* data = stbi_load("Assets/Texturas/Ambient.png", &width, &height, &channels, 0);
+        if (data && width > 0)
+        {
+            // We want to interpolate horizontally across the first row of pixels
+            // Or if many rows, we can just take the middle row or first row (height - 1 - Y / 2 or 0)
+            // Horizontally means traversing X from 0 to width - 1
+            // Let's read the pixels along X at y = height / 2 (or y = 0)
+            int targetY = height / 2;
+            for (int x = 0; x < width; ++x)
+            {
+                int index = (targetY * width + x) * channels;
+                float r = data[index] / 255.0f;
+                float g = (channels > 1) ? data[index + 1] / 255.0f : r;
+                float b = (channels > 2) ? data[index + 2] / 255.0f : r;
+                ambientColors.push_back(glm::vec3(r, g, b));
+            }
+            stbi_image_free(data);
+        }
+        else
+        {
+            std::cerr << "Game: failed to load Ambient.png pixels!" << std::endl;
+            if (data) stbi_image_free(data);
+            // Default fallback gradient if image load fails
+            for (int i = 0; i < 256; ++i)
+            {
+                float t = i / 255.0f;
+                glm::vec3 midnightAmbient = glm::vec3(0.02f, 0.02f, 0.09f);
+                glm::vec3 middayAmbient = glm::vec3(0.22f, 0.20f, 0.12f);
+                ambientColors.push_back(glm::mix(midnightAmbient, middayAmbient, t));
+            }
+        }
+    }
 
     // Cargar mallas (reutilizar en todas sus instancias)
     Mesh* trollMesh = objLoader.LoadOBJMesh("Assets/Modelos/troll.obj");
@@ -189,7 +227,7 @@ void Game::Update()
 
     //  una vez por frame
     flashlight.HandleInput();
-
+    
 	//IA Prompt: Implementa un sistema de d�a y noche que haga orbitar al sol y la luna alrededor del punto 0,0,0 , cambiando sus posiciones, colores e intensidades de luz, y el color ambiental para simular el paso del tiempo. El ciclo completo debe durar 20 segundos.
     //C�lculos de la mec�nica orbital (Duraci�n del ciclo = 20 segundos)
     float time = TM->GetGlobalTime();
@@ -212,31 +250,50 @@ void Game::Update()
         MoonGO->transform.position = moonPos;
     }
 
-    //2.C�lculo de Direcciones e Intensidades de Luz
+    //2.Clculo de Direcciones e Intensidades de Luz
     glm::vec3 sunDirection = glm::normalize(sunPos - glm::vec3(0,0,0));
     glm::vec3 moonDirection = glm::normalize(moonPos - glm::vec3(0,0,0));
 
-    //Si est�n bajo del suelo (Y <= 0), dejan de emitir luz
+    //Si estn bajo del suelo (Y <= 0), dejan de emitir luz
     glm::vec3 sunColor = glm::vec3(0.0f);
     if (sunPos.y > 0.0f) {
-        sunColor = glm::vec3(1.0f, 0.95f, 0.85f); // Sol: Luz fuerte y c�lida
+        sunColor = glm::vec3(1.0f, 0.95f, 0.85f); 
     }
 
     glm::vec3 moonColor = glm::vec3(0.0f);
     if (moonPos.y > 0.0f) {
-        moonColor = glm::vec3(0.15f, 0.22f, 0.35f); // Luna: Luz tenue y fr�a
+        moonColor = glm::vec3(0.15f, 0.22f, 0.35f);
     }
 
-    // 3. Interpolaci�n de ambient ligth
-    // t va de 0.0 (medianoche) a 1.0 (mediod�a) basado en el seno del �ngulo orbital del sol
-    float t = (sin(angle) + 1.0f) * 0.5f;
-    glm::vec3 midnightAmbient = glm::vec3(0.02f, 0.02f, 0.09f); // Azul oscuro
-    glm::vec3 middayAmbient = glm::vec3(0.22f, 0.20f, 0.12f);    // Color amarillentos
-    glm::vec3 ambientColor = glm::mix(midnightAmbient, middayAmbient, t);
-    float currentAmbientStrength = glm::mix(0.05f, AmbientStrength, t);
+	//Interpolacin de ambient ligth, Ia prompt: Usa AmbientLigth.txt para definir un gradiente de colores
+    float t = fmod(time, cycleDuration) / cycleDuration;
+    ambientOffset = fmod(ambientOffset + 0.0002f, 1.0f);
 
-    // Actualizar el color de fondo para fundirse de d�a a noche
+    glm::vec3 ambientColor;
+    if (!ambientColors.empty())
+    {
+        // Interpolate through ambientColors loaded from Ambient.png horizontally
+        float sampleT = fmod(t + ambientOffset, 1.0f);
+        float floatIndex = sampleT * (ambientColors.size() - 1);
+        int indexLow = static_cast<int>(floor(floatIndex));
+        int indexHigh = static_cast<int>(ceil(floatIndex));
+        float factor = floatIndex - indexLow;
+        ambientColor = glm::mix(ambientColors[indexLow], ambientColors[indexHigh], factor);
+    }
+    else
+    {
+        glm::vec3 midnightAmbient = glm::vec3(0.02f, 0.02f, 0.09f); // Azul oscuro
+        glm::vec3 middayAmbient = glm::vec3(0.22f, 0.20f, 0.12f);    // Color amarillentos
+        float sinT = (sin(angle) + 1.0f) * 0.5f;
+        ambientColor = glm::mix(midnightAmbient, middayAmbient, sinT);
+    }
+    // Para la intensidad o intensidad de la mezcla, usamos la altura del sol (sin(angle))
+    float sinT = (sin(angle) + 1.0f) * 0.5f;
+    float currentAmbientStrength = glm::mix(0.05f, AmbientStrength, sinT);
+
+    // Actualizar el color de fondo para fundirse de da a noche
     renderer.SetClearColor(ambientColor.r, ambientColor.g, ambientColor.b, 1.0f);
+
 
 
 

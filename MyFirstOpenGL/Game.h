@@ -32,8 +32,9 @@ public:
     GLuint trollTexID = 0;
     GLuint rockTexID = 0;
     GLuint colormapTexID = 0;
+    std::vector<glm::vec3> ambientColors;
 
-	//Referencias a los modelos de sol y luna (siempre presenter asi que podemos poner en el game en s�)
+	//Referencias a los modelos de sol y luna (siempre presenter asi que podemos poner en el game en s)
     GameObject* SunGO = nullptr;
     GameObject* MoonGO = nullptr;
 
@@ -47,6 +48,7 @@ private:
     const float AmbientStrength = 0.15f;
     const glm::vec3 LigthSource = glm::vec3(0.0f, 0.0f, 1.0f);
     const glm::vec3 LigthColor = glm::vec3( 1.0f,  1.0f,  1.0f);
+    float ambientOffset = 0.0f;
 
     void Init();
     void RunLoop();
