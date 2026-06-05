@@ -31,6 +31,16 @@ Mesh::Mesh(const std::vector<float>& vertices, const std::vector<float>& uvs, co
         glEnableVertexAttribArray(1);
     }
 
+    // Registrar normales en location 2
+    if (!normals.empty())
+    {
+        glGenBuffers(1, &this->vboNormals);
+        glBindBuffer(GL_ARRAY_BUFFER, this->vboNormals);
+        glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(float), normals.data(), GL_STATIC_DRAW);
+        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(2);
+    }
+
     //Desvinculamos VAO y VBO
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);

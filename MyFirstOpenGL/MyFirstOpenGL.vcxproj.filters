@@ -66,6 +66,15 @@
     <ClCompile Include="WindowManager.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
+    <ClCompile Include="TextureLoader.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="Flashlight.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="Spawner.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="CubeVertexShader.glsl">
@@ -76,24 +85,6 @@
     </None>
     <None Include="CubeFragmentShader.glsl">
       <Filter>Shaders\Fragment Shader</Filter>
-    </None>
-    <None Include="PyramidFragmentShader.glsl">
-      <Filter>Shaders\Fragment Shader</Filter>
-    </None>
-    <None Include="RectFragmentShader.glsl">
-      <Filter>Shaders\Fragment Shader</Filter>
-    </None>
-    <None Include="PyramidGeometryShader.glsl">
-      <Filter>Shaders\Geometry Shader</Filter>
-    </None>
-    <None Include="RectGeometryShader.glsl">
-      <Filter>Shaders\Geometry Shader</Filter>
-    </None>
-    <None Include="PyramidVertexShader.glsl">
-      <Filter>Shaders\Vertex Shader</Filter>
-    </None>
-    <None Include="RectVertexShader.glsl">
-      <Filter>Shaders\Vertex Shader</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -127,10 +118,19 @@
     <ClInclude Include="Game.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
+    <ClInclude Include="Spawner.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
     <ClInclude Include="OBJLoader.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
     <ClInclude Include="WindowManager.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureLoader.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Flashlight.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
   </ItemGroup>
@@ -144,6 +144,9 @@
       <Filter>Archivos de recursos</Filter>
     </Image>
     <Image Include="Assets\Texturas\rock.png">
+      <Filter>Archivos de recursos</Filter>
+    </Image>
+    <Image Include="Assets\Texturas\Ambient.png">
       <Filter>Archivos de recursos</Filter>
     </Image>
   </ItemGroup>
