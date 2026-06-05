@@ -72,6 +72,9 @@
     <ClCompile Include="Flashlight.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
+    <ClCompile Include="Spawner.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="CubeVertexShader.glsl">
@@ -113,6 +116,9 @@
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
     <ClInclude Include="Game.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Spawner.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
     <ClInclude Include="OBJLoader.h">
