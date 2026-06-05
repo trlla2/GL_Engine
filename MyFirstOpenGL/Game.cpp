@@ -4,6 +4,8 @@
 #include "TimeManager.h"
 #include <gtc/constants.hpp>
 #include <iostream>
+#include <cstdlib>
+#include <ctime>
 
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
@@ -64,12 +66,24 @@ void Game::Init()
     // cargar texturas tras inicializar el contexto OpenGL
     trollTexID = textureLoader.Load("Assets/Texturas/troll.png");
     rockTexID = textureLoader.Load("Assets/Texturas/rock.png");
+    // textura compartida por los modelos del spawner
+    colormapTexID = textureLoader.Load("Assets/Texturas/colormap.png");
 
     // Cargar mallas (reutilizar en todas sus instancias)
     Mesh* trollMesh = objLoader.LoadOBJMesh("Assets/Modelos/troll.obj");
     meshes.push_back(trollMesh);
     Mesh* rockMesh = objLoader.LoadOBJMesh("Assets/Modelos/rock.obj");
     meshes.push_back(rockMesh);
+
+    // mallas para el spawner (todas usan colormap.png)
+    Mesh* hayBaleMesh = objLoader.LoadOBJMesh("Assets/Modelos/hay-bale.obj");
+    meshes.push_back(hayBaleMesh);
+    Mesh* pineFallMesh = objLoader.LoadOBJMesh("Assets/Modelos/pine-fall.obj");
+    meshes.push_back(pineFallMesh);
+    Mesh* trunkMesh = objLoader.LoadOBJMesh("Assets/Modelos/trunk.obj");
+    meshes.push_back(trunkMesh);
+    Mesh* pineMesh = objLoader.LoadOBJMesh("Assets/Modelos/pine.obj");
+    meshes.push_back(pineMesh);
 
     // Cargar mallas para el Sol y la Luna
     //El mismo modelo pq LOS MODELOS D INTERNER USAN QUADS I NO LO PODEMOS LEER
@@ -122,16 +136,36 @@ void Game::Init()
 	GameObject* sun = CreateGameObject(sunMesh, "CubeVertexShader.glsl", "CubeGeometryShader.glsl", "CubeFragmentShader.glsl");
 	sun->transform.position = glm::vec3(0.f, 50.f, 0.f);
 	sun->transform.scale = glm::vec3(8.f);
-	sun->enableLighting = false; // El Sol no recibe iluminación
+	sun->enableLighting = false; // El Sol no recibe iluminaciï¿½n
 	sun->texID = 0; // El Sol no tiene textura, solo color
 	SunGO = sun; // Guardar referencia
 
 	GameObject* moon = CreateGameObject(moonMesh, "CubeVertexShader.glsl", "CubeGeometryShader.glsl", "CubeFragmentShader.glsl");
 	moon->transform.position = glm::vec3(0.f, -50.f, 0.f);
 	moon->transform.scale = glm::vec3(2.f);
-	moon->enableLighting = false; // La Luna no recibe iluminación
+	moon->enableLighting = false; // La Luna no recibe iluminaciï¿½n
 	moon->texID = 0; // La Luna no tiene textura, solo color
 	MoonGO = moon; // Guardar referencia
+
+    // semilla aleatoria para que el spawn cambie en cada ejecucion
+    srand((unsigned int)time(nullptr));
+
+    // configurar modelos disponibles para el spawner (todos usan colormap.png)
+    spawner.AddModel(hayBaleMesh, colormapTexID);
+    spawner.AddModel(pineFallMesh, colormapTexID);
+    spawner.AddModel(trunkMesh, colormapTexID);
+    spawner.AddModel(pineMesh, colormapTexID);
+
+    // puntos donde puede aparecer un modelo (a ras de suelo)
+    spawner.AddSpawnPoint(glm::vec3(-5.f, 0.f, -3.f));
+    spawner.AddSpawnPoint(glm::vec3(5.f, 0.f, -3.f));
+    spawner.AddSpawnPoint(glm::vec3(-4.f, 0.f, 4.f));
+    spawner.AddSpawnPoint(glm::vec3(4.f, 0.f, 4.f));
+    spawner.AddSpawnPoint(glm::vec3(0.f, 0.f, 6.f));
+    spawner.AddSpawnPoint(glm::vec3(2.f, 0.f, -6.f));
+
+    // escoger 3 spawnpoints al azar y crear un modelo aleatorio en cada uno
+    spawner.SpawnAll(this, "CubeVertexShader.glsl", "CubeGeometryShader.glsl", "CubeFragmentShader.glsl", 3);
 
     //Definimos color para limpiar el buffer de color
     renderer.SetClearColor(0.f, 0.f, 0.f, 1.f);
@@ -156,18 +190,18 @@ void Game::Update()
     //  una vez por frame
     flashlight.HandleInput();
 
-	//IA Prompt: Implementa un sistema de día y noche que haga orbitar al sol y la luna alrededor del punto 0,0,0 , cambiando sus posiciones, colores e intensidades de luz, y el color ambiental para simular el paso del tiempo. El ciclo completo debe durar 20 segundos.
-    //Cálculos de la mecánica orbital (Duración del ciclo = 20 segundos)
+	//IA Prompt: Implementa un sistema de dï¿½a y noche que haga orbitar al sol y la luna alrededor del punto 0,0,0 , cambiando sus posiciones, colores e intensidades de luz, y el color ambiental para simular el paso del tiempo. El ciclo completo debe durar 20 segundos.
+    //Cï¿½lculos de la mecï¿½nica orbital (Duraciï¿½n del ciclo = 20 segundos)
     float time = TM->GetGlobalTime();
     float cycleDuration = 20.0f;
 	float angle = (time / cycleDuration) * 2.0f * glm::pi<float>(); // angulo = delta * 2PI
 
-    //Radio de la órbita alrededor de (0,0,0)
+    //Radio de la ï¿½rbita alrededor de (0,0,0)
     float orbitRadius = 50.0f;
 
-    // Posición del Sol y la Luna (órbita vertical en el plano Y-Z)
+    // Posiciï¿½n del Sol y la Luna (ï¿½rbita vertical en el plano Y-Z)
     glm::vec3 sunPos = glm::vec3(0.0f, orbitRadius * sin(angle), orbitRadius * cos(angle));
-    //Luna siempre a 180° del Sol (+ PI)
+    //Luna siempre a 180ï¿½ del Sol (+ PI)
     glm::vec3 moonPos = glm::vec3(0.0f, orbitRadius * sin(angle + glm::pi<float>()), orbitRadius * cos(angle + glm::pi<float>()));
 
     // Actualizar posiciones de los GameObjects orbitales
@@ -178,30 +212,30 @@ void Game::Update()
         MoonGO->transform.position = moonPos;
     }
 
-    //2.Cálculo de Direcciones e Intensidades de Luz
+    //2.Cï¿½lculo de Direcciones e Intensidades de Luz
     glm::vec3 sunDirection = glm::normalize(sunPos - glm::vec3(0,0,0));
     glm::vec3 moonDirection = glm::normalize(moonPos - glm::vec3(0,0,0));
 
-    //Si están bajo del suelo (Y <= 0), dejan de emitir luz
+    //Si estï¿½n bajo del suelo (Y <= 0), dejan de emitir luz
     glm::vec3 sunColor = glm::vec3(0.0f);
     if (sunPos.y > 0.0f) {
-        sunColor = glm::vec3(1.0f, 0.95f, 0.85f); // Sol: Luz fuerte y cálida
+        sunColor = glm::vec3(1.0f, 0.95f, 0.85f); // Sol: Luz fuerte y cï¿½lida
     }
 
     glm::vec3 moonColor = glm::vec3(0.0f);
     if (moonPos.y > 0.0f) {
-        moonColor = glm::vec3(0.15f, 0.22f, 0.35f); // Luna: Luz tenue y fría
+        moonColor = glm::vec3(0.15f, 0.22f, 0.35f); // Luna: Luz tenue y frï¿½a
     }
 
-    // 3. Interpolación de ambient ligth
-    // t va de 0.0 (medianoche) a 1.0 (mediodía) basado en el seno del ángulo orbital del sol
+    // 3. Interpolaciï¿½n de ambient ligth
+    // t va de 0.0 (medianoche) a 1.0 (mediodï¿½a) basado en el seno del ï¿½ngulo orbital del sol
     float t = (sin(angle) + 1.0f) * 0.5f;
     glm::vec3 midnightAmbient = glm::vec3(0.02f, 0.02f, 0.09f); // Azul oscuro
     glm::vec3 middayAmbient = glm::vec3(0.22f, 0.20f, 0.12f);    // Color amarillentos
     glm::vec3 ambientColor = glm::mix(midnightAmbient, middayAmbient, t);
     float currentAmbientStrength = glm::mix(0.05f, AmbientStrength, t);
 
-    // Actualizar el color de fondo para fundirse de día a noche
+    // Actualizar el color de fondo para fundirse de dï¿½a a noche
     renderer.SetClearColor(ambientColor.r, ambientColor.g, ambientColor.b, 1.0f);
 
 
@@ -214,7 +248,7 @@ void Game::Update()
 
         glUseProgram(compiledPrograms[i]);
 
-        // Enviar parámetros direccionales y ambientales
+        // Enviar parï¿½metros direccionales y ambientales
         glUniform3f(glGetUniformLocation(compiledPrograms[i], "uSunDirection"), sunDirection.x, sunDirection.y, sunDirection.z);
         glUniform3f(glGetUniformLocation(compiledPrograms[i], "uSunColor"), sunColor.x, sunColor.y, sunColor.z);
 
@@ -248,6 +282,7 @@ void Game::Stop()
     // liberar texturas al cerrar
     glDeleteTextures(1, &trollTexID);
     glDeleteTextures(1, &rockTexID);
+    glDeleteTextures(1, &colormapTexID);
 
     for (GameObject* obj : sceneObjects)
         delete obj;

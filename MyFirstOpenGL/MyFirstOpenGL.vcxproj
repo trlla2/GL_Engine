@@ -30,6 +30,7 @@
     <ClCompile Include="ShaderLoaders.cpp" />
     <ClCompile Include="ShaderProgram.cpp" />
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="Spawner.cpp" />
     <ClCompile Include="stb.cpp" />
     <ClCompile Include="TextureLoader.cpp" />
     <ClCompile Include="TimeManager.cpp" />
@@ -52,6 +53,7 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="ShaderLoaders.h" />
     <ClInclude Include="ShaderProgram.h" />
+    <ClInclude Include="Spawner.h" />
     <ClInclude Include="TextureLoader.h" />
     <ClInclude Include="TimeManager.h" />
     <ClInclude Include="WindowManager.h" />

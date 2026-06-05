@@ -11,6 +11,7 @@
 #include "OBJLoader.h"
 #include "TextureLoader.h"
 #include "Flashlight.h"
+#include "Spawner.h"
 
 class Game
 {
@@ -25,16 +26,21 @@ public:
 	Flashlight flashlight;
     OBJLoader objLoader;
     TextureLoader textureLoader;
+    Spawner spawner;
 
     // IDs de texturas cargadas en GPU
     GLuint trollTexID = 0;
     GLuint rockTexID = 0;
+    GLuint colormapTexID = 0;
 
-	//Referencias a los modelos de sol y luna (siempre presenter asi que podemos poner en el game en sí)
+	//Referencias a los modelos de sol y luna (siempre presenter asi que podemos poner en el game en sï¿½)
     GameObject* SunGO = nullptr;
     GameObject* MoonGO = nullptr;
 
     void Run();
+
+    //usaremos para crear los objectos y assignar sus shaders
+    GameObject* CreateGameObject(Mesh* mesh, const char* vertexShader, const char* geometryShader, const char* fragmentShader);
 
 private:
     // Lighting constants
@@ -47,6 +53,4 @@ private:
     void Update();
     void Render();
     void Stop();
-    //USaremos para crear los objectos y assignar sus shaders
-    GameObject* CreateGameObject(Mesh* mesh, const char* vertexShader, const char* geometryShader, const char* fragmentShader);
 };
