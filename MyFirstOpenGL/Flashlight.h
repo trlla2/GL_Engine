@@ -1,14 +1,17 @@
 #pragma once
-#include "GameObjects.h"
+#include <glm.hpp>
+#include <GL/glew.h>
 
-class Flashlight
+class Flashlight 
 {
 public:
+	float innerCutOff = 10.f;
+	float outerCutoff = 15.f;
+
+
 	float intensity = 4.f;
 	float range = 30.f;
 	
-	
-	float cutOff = 12.5f;
 
 	void HandleInput();
 	void Update(GLuint* compiledProgram, glm::vec3 position,glm::vec3 forwardDirection);

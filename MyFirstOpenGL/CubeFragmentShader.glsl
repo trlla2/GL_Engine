@@ -26,6 +26,12 @@ uniform vec3 lightColor;
 uniform float ambientStrength;
 
 // SPOTLIGHT
+uniform vec3 spotPosition;
+uniform vec3 spotDirection;
+
+uniform float spotInnerCutOff;
+uniform float spotOuterCutOff;
+
 
 
 void main()
@@ -58,12 +64,22 @@ void main()
 
         // Spotlight calculations
        
+       float spotLight = 0;
+
+       // calculamos la direccion de la luz de la spotlight respecto al tri affectado
+       vec3 lightDirection = normalize(spotPosition - gPrimitivePosition.xyz);
 
         
+       float theta = dot(lightDirection, - spotDirection);
+       
+       if(theta > spotInnerCutOff) 
+       {
+            spotLight = 1;
+       }
 
 
         // suma de todas las luces
-        vec3 lighting = ambient + diffuse;
+        vec3 lighting = ambient + diffuse + spotLight;
      
 
         fragColor = vec4(baseColor.rgb * lighting, 1.0) * uTint;

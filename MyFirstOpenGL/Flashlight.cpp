@@ -14,6 +14,14 @@ void Flashlight::Update(GLuint* compiledProgram, glm::vec3 position, glm::vec3 f
 	
 	float currentIntensity = active ? intensity : 0.f;
 
+	glUniform3f(glGetUniformLocation(*compiledProgram, "spotPosition"), position.x, position.y, position.z);
+	glUniform3f(glGetUniformLocation(*compiledProgram, "spotDirection"), forwardDirection.x, forwardDirection.y, forwardDirection.z);
+	
+	glUniform1f(glGetUniformLocation(*compiledProgram, "spotInnerCutOff"), glm::cos(glm::radians(innerCutOff)));
+	glUniform1f(glGetUniformLocation(*compiledProgram, "spotOuterCutOff"), glm::cos(glm::radians(outerCutoff)));
+
+
+
 
 	glUseProgram(0);
 }
