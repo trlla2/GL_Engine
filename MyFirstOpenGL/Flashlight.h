@@ -4,13 +4,11 @@
 class Flashlight
 {
 public:
-	glm::vec3 color = glm::vec3(1.f, 1.f, 0.5f);
 	float intensity = 4.f;
 	float range = 30.f;
 	
 	
-	float innerCutOff = 12.5f;
-	float outerCutOff = 17.5f;
+	float cutOff = 12.5f;
 
 	void HandleInput();
 	void Update(GLuint* compiledProgram, glm::vec3 position,glm::vec3 forwardDirection);

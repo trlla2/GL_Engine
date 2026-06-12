@@ -25,18 +25,8 @@ uniform vec3 uMoonColor;
 uniform vec3 lightColor;
 uniform float ambientStrength;
 
+// SPOTLIGHT
 
-// AI PROMPT(con contexto de este script ): dime que valores pondrias para hacer una flashlight 
-// Spotlight
-uniform vec3 spotlightPos;
-uniform vec3 spotlightDir;
-
-uniform vec3 spotlightColor;
-uniform float spotlightIntensity;
-uniform float spotlightRange;
-
-uniform float spotlightInnerCutOff;
-uniform float spotlightOuterCutOff;
 
 void main()
 {
@@ -67,34 +57,13 @@ void main()
         vec3 diffuse = sunDiffuse + moonDiffuse;
 
         // Spotlight calculations
-        vec3 toLight = spotlightPos - gPrimitivePosition.xyz; 
-        float dist = length(toLight);
-        vec3 L = toLight / max(dist, 0.0001);
+       
 
-        // angulo entre direccion y el objeto
-        float theta = dot(-L, normalize(spotlightDir));
-
-        // calcular cono de luz con smoothstep
-        float cone = smoothstep(spotlightOuterCutOff, spotlightInnerCutOff, theta);
-
-        // Ley del cuadrado inverso para atenuacion realista,
-        //Codigo hehco con IA para rangos de ~30 a 50 unidades, con mitigacion de corte abrupto al aproximarse al spotlightRange
-        //Prompt: Aplicar el cuadrado inverso para hacer que la luz pierde intensidad según la distancia.
-        float constant = 1.0;
-        float linear = 0.09;
-        float quadratic = 0.032;
-        float atenuation = 1.0 / (constant + linear * dist + quadratic * (dist * dist));
-    
-        // Mitigación de corte abrupto: Desvanecemos a cero suavemente al aproximarse al spotlightRange (tmb IA)
-        float rangeFade = clamp(1.0 - dist / spotlightRange, 0.0, 1.0);
-        atenuation *= rangeFade;
-
-        float diff = max(dot(normal, L), 0.0);
-        vec3 spot = spotlightColor * spotlightIntensity * diff * cone * atenuation;
+        
 
 
         // suma de todas las luces
-        vec3 lighting = ambient + diffuse + spot;
+        vec3 lighting = ambient + diffuse;
      
 
         fragColor = vec4(baseColor.rgb * lighting, 1.0) * uTint;
