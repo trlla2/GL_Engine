@@ -77,20 +77,21 @@ void main()
         // calcular cono de luz con smoothstep
         float cone = smoothstep(spotlightOuterCutOff, spotlightInnerCutOff, theta);
 
-        // Ley del cuadrado inverso para atenuacion realista,
-        //Codigo hehco con IA para rangos de ~30 a 50 unidades, con mitigacion de corte abrupto al aproximarse al spotlightRange
-        //Prompt: Aplicar el cuadrado inverso para hacer que la luz pierde intensidad según la distancia.
-        float constant = 1.0;
-        float linear = 0.09;
-        float quadratic = 0.032;
-        float atenuation = 1.0 / (constant + linear * dist + quadratic * (dist * dist));
-    
-        // Mitigación de corte abrupto: Desvanecemos a cero suavemente al aproximarse al spotlightRange (tmb IA)
-        float rangeFade = clamp(1.0 - dist / spotlightRange, 0.0, 1.0);
-        atenuation *= rangeFade;
+        //IA Prompt: Explain me the formula fot ligth attenuation
+        //Ia response:
+        //Physical Inverse-Square Law (Real-World)
+        //In physics, light radiating from a single point spreads spherically over an area,
+        //meaning its intensity drops proportionally to the square of the distance:
+        //  (I(d) = I₀ / d^2) Where:
+        // I(d) = Intensity at distance d, 
+        // I₀ = Initial light intensity, 
+        // d = Distance from the light source
+        // A partir de esto, podemos calcular que:
+
+        float Id = spotlightIntensity / (dist * dist);
 
         float diff = max(dot(normal, L), 0.0);
-        vec3 spot = spotlightColor * spotlightIntensity * diff * cone * atenuation;
+        vec3 spot = spotlightColor * spotlightIntensity * diff * cone * Id;
 
 
         // suma de todas las luces
