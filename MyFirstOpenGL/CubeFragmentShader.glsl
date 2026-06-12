@@ -34,6 +34,8 @@ uniform float spotOuterCutOff;
 
 uniform float spotIntensity;
 
+uniform float spotRange;
+
 
 
 void main()
@@ -71,6 +73,8 @@ void main()
        // calculamos la direccion de la luz de la spotlight respecto al tri affectado
        vec3 lightDirection = normalize(spotPosition - gPrimitivePosition.xyz);
 
+       // calculamos la distancia entre luz y tri para el range
+       float lightDistance = length(spotPosition - gPrimitivePosition.xyz);
         
        float theta = dot(lightDirection, - spotDirection);
        // calculamos si el tri esta dentro o fuera del radio
@@ -80,7 +84,11 @@ void main()
             float epsilon = spotInnerCutOff - spotOuterCutOff;
             float intensity = clamp((theta - spotOuterCutOff) / epsilon, 0.0, 1.0);
             
-            spotLight = intensity * spotIntensity;
+            // 0 - 1 segun lo lejos que esta el tri de la luz segun el range
+            float clampDistance = clamp(1.0 - lightDistance / spotRange, 0.0, 1.0); 
+
+            // multiplicador externo * inensidad segun si esta fuera o dentro del inner * intensidad segun la distancia 
+            spotLight = intensity * spotIntensity * clampDistance;
        }
 
 
