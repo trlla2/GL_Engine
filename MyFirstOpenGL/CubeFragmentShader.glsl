@@ -32,7 +32,7 @@ uniform vec3 spotDirection;
 uniform float spotInnerCutOff;
 uniform float spotOuterCutOff;
 
-uniform float spotInensity;
+uniform float spotIntensity;
 
 
 
@@ -73,10 +73,14 @@ void main()
 
         
        float theta = dot(lightDirection, - spotDirection);
-       
-       if(theta > spotInnerCutOff) 
+       // calculamos si el tri esta dentro o fuera del radio
+       if(theta > spotOuterCutOff) 
        {
-            spotLight = spotInensity;
+            // cambiamos la intensidad segun si estan dentro o fuera del InnerCutOff
+            float epsilon = spotInnerCutOff - spotOuterCutOff;
+            float intensity = clamp((theta - spotOuterCutOff) / epsilon, 0.0, 1.0);
+            
+            spotLight = intensity * spotIntensity;
        }
 
 
