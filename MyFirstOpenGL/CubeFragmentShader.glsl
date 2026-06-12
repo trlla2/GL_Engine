@@ -32,6 +32,8 @@ uniform vec3 spotDirection;
 uniform float spotInnerCutOff;
 uniform float spotOuterCutOff;
 
+uniform float spotInensity;
+
 
 
 void main()
@@ -74,7 +76,7 @@ void main()
        
        if(theta > spotInnerCutOff) 
        {
-            spotLight = 1;
+            spotLight = spotInensity;
        }
 
 
