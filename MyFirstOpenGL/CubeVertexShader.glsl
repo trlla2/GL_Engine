@@ -7,6 +7,7 @@ layout(location = 2) in vec3 aNormal; // normales del modelo
 
 out vec2 vTexCoord; // se propaga al geometry shader
 out vec3 vNormal; // se propaga al geometry shader
+
 void main()
 {
     vNormal   = aNormal;
