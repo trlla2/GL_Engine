@@ -25,18 +25,18 @@ uniform vec3 uMoonColor;
 uniform vec3 lightColor;
 uniform float ambientStrength;
 
+// SPOTLIGHT
+uniform vec3 spotPosition;
+uniform vec3 spotDirection;
 
-// AI PROMPT(con contexto de este script ): dime que valores pondrias para hacer una flashlight 
-// Spotlight
-uniform vec3 spotlightPos;
-uniform vec3 spotlightDir;
+uniform float spotInnerCutOff;
+uniform float spotOuterCutOff;
 
-uniform vec3 spotlightColor;
-uniform float spotlightIntensity;
-uniform float spotlightRange;
+uniform float spotIntensity;
 
-uniform float spotlightInnerCutOff;
-uniform float spotlightOuterCutOff;
+uniform float spotRange;
+
+
 
 void main()
 {
@@ -67,34 +67,46 @@ void main()
         vec3 diffuse = sunDiffuse + moonDiffuse;
 
         // Spotlight calculations
-        vec3 toLight = spotlightPos - gPrimitivePosition.xyz; 
-        float dist = length(toLight);
-        vec3 L = toLight / max(dist, 0.0001);
+       
+       float spotLight = 0;
 
-        // angulo entre direccion y el objeto
-        float theta = dot(-L, normalize(spotlightDir));
+       // calculamos la direccion de la luz de la spotlight respecto al tri affectado
+       vec3 lightDirection = normalize(spotPosition - gPrimitivePosition.xyz);
 
-        // calcular cono de luz con smoothstep
-        float cone = smoothstep(spotlightOuterCutOff, spotlightInnerCutOff, theta);
+       // calculamos la distancia entre luz y tri para el range
+       float lightDistance = length(spotPosition - gPrimitivePosition.xyz);
+        
+       float theta = dot(lightDirection, - spotDirection);
+       // calculamos si el tri esta dentro o fuera del radio
+       if(theta > spotOuterCutOff) 
+       {
+            // cambiamos la intensidad segun si estan dentro o fuera del InnerCutOff
+            float epsilon = spotInnerCutOff - spotOuterCutOff;
+            float intensity = clamp((theta - spotOuterCutOff) / epsilon, 0.0, 1.0);
 
-        // Ley del cuadrado inverso para atenuacion realista,
-        //Codigo hehco con IA para rangos de ~30 a 50 unidades, con mitigacion de corte abrupto al aproximarse al spotlightRange
-        //Prompt: Aplicar el cuadrado inverso para hacer que la luz pierde intensidad según la distancia.
-        float constant = 1.0;
-        float linear = 0.09;
-        float quadratic = 0.032;
-        float atenuation = 1.0 / (constant + linear * dist + quadratic * (dist * dist));
+        //IA Prompt: Explain me the formula fot ligth attenuation
+        //Ia response:
+        //Physical Inverse-Square Law
+        //In physics, light radiating from a single point spreads spherically over an area,
+        //meaning its intensity drops proportionally to the square of the distance:
+        //  (I(d) = I₀ / d^2) Where:
+        // I(d) = Intensity at distance d, 
+        // I₀ = Initial light intensity, 
+        // d = Distance from the light source
+        // A partir de esto, podemos calcular que:
+
+        float Id = spotIntensity / (lightDistance * lightDistance);
+
     
-        // Mitigación de corte abrupto: Desvanecemos a cero suavemente al aproximarse al spotlightRange (tmb IA)
-        float rangeFade = clamp(1.0 - dist / spotlightRange, 0.0, 1.0);
-        atenuation *= rangeFade;
+            // 0 - 1 segun lo lejos que esta el tri de la luz segun el range
+            float clampDistance = clamp(1.0 - lightDistance / spotRange, 0.0, 1.0); 
 
-        float diff = max(dot(normal, L), 0.0);
-        vec3 spot = spotlightColor * spotlightIntensity * diff * cone * atenuation;
-
+            // multiplicador externo * inensidad segun si esta fuera o dentro del inner * intensidad segun la distancia 
+            spotLight = intensity * Id * clampDistance;
+       }
 
         // suma de todas las luces
-        vec3 lighting = ambient + diffuse + spot;
+        vec3 lighting = ambient + diffuse + spotLight;
      
 
         fragColor = vec4(baseColor.rgb * lighting, 1.0) * uTint;
