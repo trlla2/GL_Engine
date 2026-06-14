@@ -83,14 +83,27 @@ void main()
             // cambiamos la intensidad segun si estan dentro o fuera del InnerCutOff
             float epsilon = spotInnerCutOff - spotOuterCutOff;
             float intensity = clamp((theta - spotOuterCutOff) / epsilon, 0.0, 1.0);
-            
+
+        //IA Prompt: Explain me the formula fot ligth attenuation
+        //Ia response:
+        //Physical Inverse-Square Law
+        //In physics, light radiating from a single point spreads spherically over an area,
+        //meaning its intensity drops proportionally to the square of the distance:
+        //  (I(d) = I₀ / d^2) Where:
+        // I(d) = Intensity at distance d, 
+        // I₀ = Initial light intensity, 
+        // d = Distance from the light source
+        // A partir de esto, podemos calcular que:
+
+        float Id = spotIntensity / (lightDistance * lightDistance);
+
+    
             // 0 - 1 segun lo lejos que esta el tri de la luz segun el range
             float clampDistance = clamp(1.0 - lightDistance / spotRange, 0.0, 1.0); 
 
             // multiplicador externo * inensidad segun si esta fuera o dentro del inner * intensidad segun la distancia 
-            spotLight = intensity * spotIntensity * clampDistance;
+            spotLight = intensity * Id * clampDistance;
        }
-
 
         // suma de todas las luces
         vec3 lighting = ambient + diffuse + spotLight;
