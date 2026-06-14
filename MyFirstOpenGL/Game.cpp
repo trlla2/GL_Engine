@@ -70,41 +70,27 @@ void Game::Init()
     // textura compartida por los modelos del spawner
     colormapTexID = textureLoader.Load("Assets/Texturas/colormap.png");
 
-    // Load and read Ambient.png pixels to populate ambientColors
+    // Load and read Ambient.png pixels
+    int width = 0, height = 0, channels = 0;
+    stbi_set_flip_vertically_on_load(true);
+    unsigned char* data = stbi_load("Assets/Texturas/Ambient.png", &width, &height, &channels, 0);
+    if (data && width > 0)
     {
-        int width = 0, height = 0, channels = 0;
-        stbi_set_flip_vertically_on_load(true);
-        unsigned char* data = stbi_load("Assets/Texturas/Ambient.png", &width, &height, &channels, 0);
-        if (data && width > 0)
+        int targetY = height / 2;
+        for (int x = 0; x < width; ++x)
         {
-            // We want to interpolate horizontally across the first row of pixels
-            // Or if many rows, we can just take the middle row or first row (height - 1 - Y / 2 or 0)
-            // Horizontally means traversing X from 0 to width - 1
-            // Let's read the pixels along X at y = height / 2 (or y = 0)
-            int targetY = height / 2;
-            for (int x = 0; x < width; ++x)
-            {
-                int index = (targetY * width + x) * channels;
-                float r = data[index] / 255.0f;
-                float g = (channels > 1) ? data[index + 1] / 255.0f : r;
-                float b = (channels > 2) ? data[index + 2] / 255.0f : r;
-                ambientColors.push_back(glm::vec3(r, g, b));
-            }
-            stbi_image_free(data);
+            int index = (targetY * width + x) * channels;
+            float r = data[index] / 255.0f;
+            float g = (channels > 1) ? data[index + 1] / 255.0f : r;
+            float b = (channels > 2) ? data[index + 2] / 255.0f : r;
+            ambientColors.push_back(glm::vec3(r, g, b)); // pusehamos los pixeles a nuestro array
         }
-        else
-        {
-            std::cerr << "Game: failed to load Ambient.png pixels!" << std::endl;
-            if (data) stbi_image_free(data);
-            // Default fallback gradient if image load fails
-            for (int i = 0; i < 256; ++i)
-            {
-                float t = i / 255.0f;
-                glm::vec3 midnightAmbient = glm::vec3(0.02f, 0.02f, 0.09f);
-                glm::vec3 middayAmbient = glm::vec3(0.22f, 0.20f, 0.12f);
-                ambientColors.push_back(glm::mix(midnightAmbient, middayAmbient, t));
-            }
-        }
+        stbi_image_free(data);
+    }
+    else
+    {
+        std::cerr << "Game: failed to load Ambient.png pixels!" << std::endl;
+		abort();
     }
 
     // Cargar mallas (reutilizar en todas sus instancias)
@@ -125,14 +111,14 @@ void Game::Init()
 
     // Cargar mallas para el Sol y la Luna
     //El mismo modelo pq LOS MODELOS D INTERNER USAN QUADS I NO LO PODEMOS LEER
-    //Sun.obj ha sido 100% generado por mi chatty gpt para q sea copatible con el formato
+    //Sun.obj ha sido 100% generado por mi chatty gpt para q sea copatible con el formato que tenemos ahora
     Mesh* sunMesh = objLoader.LoadOBJMesh("Assets/Modelos/Sun.obj");
     meshes.push_back(sunMesh);
     Mesh* moonMesh = objLoader.LoadOBJMesh("Assets/Modelos/Sun.obj");
     meshes.push_back(moonMesh);
 
     // Crear GameObjects (asignar tints y texturas)
-    // Prompt IA: Crea los objetos necesarios que salen en el documento adjunto
+    // Prompt IA: Crea los objetos necesarios que salen en el documento adjunto (Esta prompt es de la segunda entrega así que no la cuentes porfa)
     // --- Troll izquierdo (verde) ---
     GameObject* trollLeft = CreateGameObject(trollMesh, "CubeVertexShader.glsl", "CubeGeometryShader.glsl", "CubeFragmentShader.glsl");
     trollLeft->transform.position = glm::vec3(-3.f, 0.f, 0.f);
@@ -185,16 +171,15 @@ void Game::Init()
 	moon->texID = 0; // La Luna no tiene textura, solo color
 	MoonGO = moon; // Guardar referencia
 
-    // semilla aleatoria para que el spawn cambie en cada ejecucion
     srand((unsigned int)time(nullptr));
 
-    // configurar modelos disponibles para el spawner (todos usan colormap.png)
+    // configurar modelos disponibles para el spawner (todos usan colormap.png que es la texura q nos da kenny asets)
     spawner.AddModel(hayBaleMesh, colormapTexID);
     spawner.AddModel(pineFallMesh, colormapTexID);
     spawner.AddModel(trunkMesh, colormapTexID);
     spawner.AddModel(pineMesh, colormapTexID);
 
-    // puntos donde puede aparecer un modelo (a ras de suelo)
+    // puntos donde puede aparecer un modelo
     spawner.AddSpawnPoint(glm::vec3(-5.f, 0.f, -3.f));
     spawner.AddSpawnPoint(glm::vec3(5.f, 0.f, -3.f));
     spawner.AddSpawnPoint(glm::vec3(-4.f, 0.f, 4.f));
@@ -227,76 +212,15 @@ void Game::Update()
 
     //  una vez por frame
     flashlight.HandleInput();
-    
-	//IA Prompt: Implementa un sistema de d�a y noche que haga orbitar al sol y la luna alrededor del punto 0,0,0 , cambiando sus posiciones, colores e intensidades de luz, y el color ambiental para simular el paso del tiempo. El ciclo completo debe durar 20 segundos.
-    //C�lculos de la mec�nica orbital (Duraci�n del ciclo = 20 segundos)
-    float time = TM->GetGlobalTime();
-    float cycleDuration = 20.0f;
-	float angle = (time / cycleDuration) * 2.0f * glm::pi<float>(); // angulo = delta * 2PI
 
-    //Radio de la �rbita alrededor de (0,0,0)
-    float orbitRadius = 50.0f;
-
-    // Posici�n del Sol y la Luna (�rbita vertical en el plano Y-Z)
-    glm::vec3 sunPos = glm::vec3(0.0f, orbitRadius * sin(angle), orbitRadius * cos(angle));
-    //Luna siempre a 180� del Sol (+ PI)
-    glm::vec3 moonPos = glm::vec3(0.0f, orbitRadius * sin(angle + glm::pi<float>()), orbitRadius * cos(angle + glm::pi<float>()));
-
-    // Actualizar posiciones de los GameObjects orbitales
-    if (SunGO != nullptr) {
-        SunGO->transform.position = sunPos;
-    }
-    if (MoonGO != nullptr) {
-        MoonGO->transform.position = moonPos;
-    }
-
-    //2.Clculo de Direcciones e Intensidades de Luz
-    glm::vec3 sunDirection = glm::normalize(sunPos - glm::vec3(0,0,0));
-    glm::vec3 moonDirection = glm::normalize(moonPos - glm::vec3(0,0,0));
-
-    //Si estn bajo del suelo (Y <= 0), dejan de emitir luz
-    glm::vec3 sunColor = glm::vec3(0.0f);
-    if (sunPos.y > 0.0f) {
-        sunColor = glm::vec3(1.0f, 0.95f, 0.85f); 
-    }
-
-    glm::vec3 moonColor = glm::vec3(0.0f);
-    if (moonPos.y > 0.0f) {
-        moonColor = glm::vec3(0.15f, 0.22f, 0.35f);
-    }
-
-	//Interpolacin de ambient ligth, Ia prompt: Usa AmbientLigth.txt para definir un gradiente de colores
-    float t = fmod(time, cycleDuration) / cycleDuration;
-    ambientOffset = fmod(ambientOffset + 0.0002f, 1.0f);
 
     glm::vec3 ambientColor;
-    if (!ambientColors.empty())
-    {
-        // Interpolate through ambientColors loaded from Ambient.png horizontally
-        float sampleT = fmod(t + ambientOffset, 1.0f);
-        float floatIndex = sampleT * (ambientColors.size() - 1);
-        int indexLow = static_cast<int>(floor(floatIndex));
-        int indexHigh = static_cast<int>(ceil(floatIndex));
-        float factor = floatIndex - indexLow;
-        ambientColor = glm::mix(ambientColors[indexLow], ambientColors[indexHigh], factor);
-    }
-    else
-    {
-        glm::vec3 midnightAmbient = glm::vec3(0.02f, 0.02f, 0.09f); // Azul oscuro
-        glm::vec3 middayAmbient = glm::vec3(0.22f, 0.20f, 0.12f);    // Color amarillentos
-        float sinT = (sin(angle) + 1.0f) * 0.5f;
-        ambientColor = glm::mix(midnightAmbient, middayAmbient, sinT);
-    }
-    // Para la intensidad o intensidad de la mezcla, usamos la altura del sol (sin(angle))
-    float sinT = (sin(angle) + 1.0f) * 0.5f;
-    float currentAmbientStrength = glm::mix(0.05f, AmbientStrength, sinT);
 
-    // Actualizar el color de fondo para fundirse de da a noche
+
+
+
+
     renderer.SetClearColor(ambientColor.r, ambientColor.g, ambientColor.b, 1.0f);
-
-
-
-
     // actualizar las matrizes de la camara, ambient,  y flaslight
     for (size_t i = 0; i < compiledPrograms.size(); i++)
     {
