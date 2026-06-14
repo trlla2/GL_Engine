@@ -213,11 +213,31 @@ void Game::Update()
     //  una vez por frame
     flashlight.HandleInput();
 
-
+    //Variables necesarias
     glm::vec3 ambientColor;
 
+    glm::vec3 sunPosition;
+    glm::vec3 sunDirection;
+    glm::vec3 sunColor;
+
+    glm::vec3 moonDirection;
+    glm::vec3 moonPosition;
+	glm::vec3 moonColor;
+
+	float currentAmbientStrength = AmbientStrength;
+
+    //Calcular duración del cyclo
 
 
+	//Calcular la posición del sol y la luna en el cielo
+
+
+	//Calcular la dirección de la luz del sol y la luna
+
+
+	//Calcular currentAmbientStrength según la posición del sol y la luna
+
+	//Assignar amvientColor al pixel correspondiente de nuestro vector ambientColors segun la parte del cyclo que estemos
 
 
     renderer.SetClearColor(ambientColor.r, ambientColor.g, ambientColor.b, 1.0f);
