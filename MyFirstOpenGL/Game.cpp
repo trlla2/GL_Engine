@@ -275,8 +275,21 @@ void Game::Update()
 	moonDirection = glm::normalize(moonPosition - WorldCenter);
 
 	//Calcular currentAmbientStrength según la posición del sol y la luna 
-	//Assignar amvientColor al pixel correspondiente de nuestro vector ambientColors segun la parte del cyclo que estemos
+	currentAmbientStrength = AmbientStrength * (sunPosition.y > 0.0f ? 1.0f : 0.1f);
 
+	//assignar colores de luz del sol y la luna
+    if (sunPosition.y > 0.0f) {
+        sunColor = glm::vec3(1.0f, 0.95f, 0.85f);
+    }
+
+    if(moonPosition.y > 0.0f) {
+        moonColor = glm::vec3(0.5f, 0.5f, 1.0f);
+    }
+
+	//Assignar amvientColor al pixel correspondiente de nuestro vector ambientColors segun la parte del cyclo que estemos
+    int ColorIndex = static_cast<int>(normalizedTime * ambientColors.size()) % ambientColors.size();
+	int InvertIndex = ambientColors.size() - 1 - ColorIndex; //Invertimos para que sea azul cuando la luna sube
+    ambientColor = ambientColors[InvertIndex];
 
     renderer.SetClearColor(ambientColor.r, ambientColor.g, ambientColor.b, 1.0f);
     // actualizar las matrizes de la camara, ambient,  y flaslight
