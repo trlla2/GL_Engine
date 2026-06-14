@@ -231,7 +231,7 @@ void Game::Update()
 	float normalizedTime = TM->GetGlobalTime() / cycleDuration;
 
 	//Calcular la posición del sol y la luna en el cielo
-	float radius = 50.0f;
+	float radius = 20.0f;
 #pragma region IAExplicacion
    //IA prompt: explicame la formula necesaria para rotar un cuerpo sobre un punto a r radio
     //Ia response: La rotación de un cuerpo (o punto) sobre otro punto se basa en la trigonometría básica.
@@ -261,10 +261,11 @@ void Game::Update()
 	radius = 1.41f * radius; // sqrt(2) * radius 
 	sunPosition.x = WorldCenter.x + radius * cos(theta) - radius * sin(theta);
 	sunPosition.y = WorldCenter.y + radius * sin(theta) + radius * cos(theta);
+    sunPosition.z = WorldCenter.z - radius * cos(theta);
 
 	moonPosition.x = WorldCenter.x + radius * cos(theta - pi) - radius * sin(theta - pi);
 	moonPosition.y = WorldCenter.y + radius * sin(theta - pi) + radius * cos(theta - pi);
-
+    moonPosition.z = WorldCenter.z - radius * cos(theta - pi);
     //Movemos los GO's
 	SunGO->transform.position = sunPosition;
 	MoonGO->transform.position = moonPosition;  
