@@ -1,27 +1,22 @@
-﻿#include "Mesh.h"
+#include "Mesh.h"
 #include <GL/glew.h>
 
 Mesh::Mesh(const std::vector<float>& vertices, const std::vector<float>& uvs, const std::vector<float>& normals) : vertexCount(vertices.size() / 3), vboUVs(0), vboNormals(0)
 {
-    //Almaceno la cantidad de vertices que habra
     this->vertexCount = vertices.size() / 3;
 
-    //Generamos VAO/VBO
     glGenVertexArrays(1, &this->vao);
     glGenBuffers(1, &this->vbo);
 
-    //Defino el VAO creado como activo
     glBindVertexArray(this->vao);
 
-    //Defino el VBO de las posiciones como activo, le paso los datos y lo configuro
+    // Location 0: posiciones
     glBindBuffer(GL_ARRAY_BUFFER, this->vbo);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-
-    //Activamos el atributo 0 (posiciones por defecto)
     glEnableVertexAttribArray(0);
 
-    // Registrar UVs en location 1
+    // Location 1: UVs
     if (!uvs.empty())
     {
         glGenBuffers(1, &this->vboUVs);
@@ -31,7 +26,7 @@ Mesh::Mesh(const std::vector<float>& vertices, const std::vector<float>& uvs, co
         glEnableVertexAttribArray(1);
     }
 
-    // Registrar normales en location 2
+    // Location 2: normales
     if (!normals.empty())
     {
         glGenBuffers(1, &this->vboNormals);
@@ -41,7 +36,6 @@ Mesh::Mesh(const std::vector<float>& vertices, const std::vector<float>& uvs, co
         glEnableVertexAttribArray(2);
     }
 
-    //Desvinculamos VAO y VBO
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
@@ -54,15 +48,11 @@ Mesh::~Mesh()
     glDeleteVertexArrays(1, &vao);
 }
 
-void Mesh::Render() const 
+void Mesh::Render() const
 {
-
-	this->Bind();
-
-    // Dibujamos
+    this->Bind();
     glDrawArrays(GL_TRIANGLES, 0, this->vertexCount);
-
-	this->Unbind();
+    this->Unbind();
 }
 
 void Mesh::Bind() const

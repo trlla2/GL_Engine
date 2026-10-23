@@ -5,6 +5,5 @@
 class OBJLoader
 {
 public:
-    // Lee un archivo .obj
     Mesh* LoadOBJMesh(const std::string& filePath);
 };

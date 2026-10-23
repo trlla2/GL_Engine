@@ -6,7 +6,6 @@
 
 class Game;
 
-// modelo que puede aparecer al spawnear
 struct SpawnModel {
     Mesh* mesh;
     GLuint texID;

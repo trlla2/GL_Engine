@@ -2,10 +2,8 @@
 
 GLuint ShaderProgram::CreateProgram()
 {
-	//Crear programa de la GPU
 	GLuint program = glCreateProgram();
 
-	//Verificar que existe un vertex shader y adjuntarlo al programa
 	if (vertexShader != 0) {
 		glAttachShader(program, vertexShader);
 	}
@@ -18,27 +16,21 @@ GLuint ShaderProgram::CreateProgram()
 		glAttachShader(program, fragmentShader);
 	}
 
-	// Linkear el programa
 	glLinkProgram(program);
 
-	//Obtener estado del programa
 	GLint success;
 	glGetProgramiv(program, GL_LINK_STATUS, &success);
 
-	//Devolver programa si todo es correcto o mostrar log en caso de error
 	if (success) {
-
-		//Liberamos recursos
+		// Una vez enlazado, los shaders ya no son necesarios en el programa
 		if (vertexShader != 0) {
 			glDetachShader(program, vertexShader);
 		}
 
-		//Liberamos recursos
 		if (geometryShader != 0) {
 			glDetachShader(program, geometryShader);
 		}
 
-		//Liberamos recursos
 		if (fragmentShader != 0) {
 			glDetachShader(program, fragmentShader);
 		}
@@ -46,12 +38,9 @@ GLuint ShaderProgram::CreateProgram()
 		return program;
 	}
 	else {
-
-		//Obtenemos longitud del log
 		GLint logLength;
 		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
 
-		//Almacenamos log
 		std::vector<GLchar> errorLog(logLength);
 		glGetProgramInfoLog(program, logLength, nullptr, errorLog.data());
 

@@ -1,4 +1,4 @@
-#include "Camera.h"
+﻿#include "Camera.h"
 #include "InputManager.h"
 #include "TimeManager.h"
 #include <gtc/type_ptr.hpp>
@@ -11,15 +11,13 @@ Camera::Camera()
 
 void Camera::Update(GLuint* compiledProgram, int const windowWidth, int const windowHeight)
 {
-    
     yaw += (float)IM->GetMouseDeltaX() * mouseSensitivity;
     pitch -= (float)IM->GetMouseDeltaY() * mouseSensitivity;
 
-    // limitamos el pitch para que no voltee la camara
+    // Limitar el pitch evita que la cámara se voltee
     if (pitch > 89.f) pitch = 89.f;
     if (pitch < -89.f) pitch = -89.f;
 
-    // forward y right a partir de los angulos
     glm::vec3 forward;
     forward.x = glm::cos(glm::radians(yaw)) * glm::cos(glm::radians(pitch));
     forward.y = glm::sin(glm::radians(pitch));
@@ -28,7 +26,6 @@ void Camera::Update(GLuint* compiledProgram, int const windowWidth, int const wi
 
     glm::vec3 right = glm::normalize(glm::cross(forward, localVectorUp));
 
-    
     float velocity = moveSpeed * TM->GetDeltaTime();
     if (IM->GetEventKey(GLFW_KEY_W, DOWN) || IM->GetEventKey(GLFW_KEY_W, HOLD))
         transform.position += forward * velocity;

@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include <GL/glew.h>
 #include <glm.hpp>
@@ -15,9 +15,9 @@ public:
 class GameObject {
 public:
     Transform transform;
-    glm::vec4 tint = glm::vec4(1.f, 1.f, 1.f, 1.f); // color multiplicador (tint)
-    GLuint texID = 0; // ID de textura OpenGL
-    bool enableLighting = true; // fasle para moon y sun
+    glm::vec4 tint = glm::vec4(1.f, 1.f, 1.f, 1.f);
+    GLuint texID = 0;
+    bool enableLighting = true;
 
     Mesh* mesh;
     ShaderProgram* shaderProgram;
@@ -35,18 +35,21 @@ public:
     Rock(Mesh* mesh, ShaderProgram* shaderProgram) : GameObject(mesh, shaderProgram) {}
 };
 
-class Sun : public GameObject 
+// El sol y la luna son emisivos: no reciben iluminaciÃ³n
+class Sun : public GameObject
 {
-    public: Sun(Mesh* mesh, ShaderProgram* shaderProgram) : GameObject(mesh, shaderProgram) 
+public:
+    Sun(Mesh* mesh, ShaderProgram* shaderProgram) : GameObject(mesh, shaderProgram)
     {
-        enableLighting = false; // El Sol no recibe iluminación de otras fuentes 
-    } 
+        enableLighting = false;
+    }
 };
 
-class Moon : public GameObject 
+class Moon : public GameObject
 {
-    public: Moon(Mesh* mesh, ShaderProgram* shaderProgram) : GameObject(mesh, shaderProgram) 
+public:
+    Moon(Mesh* mesh, ShaderProgram* shaderProgram) : GameObject(mesh, shaderProgram)
     {
-        enableLighting = false; // La Luna no recibe iluminación de otras fuentes 
-    } 
+        enableLighting = false;
+    }
 };
