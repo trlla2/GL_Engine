@@ -20,7 +20,7 @@ private:
 	float fFov = 45.f;
 
 	float yaw = -90.f;   
-	float pitch = 0.f; 
+	float pitch = -6.f;
 	float mouseSensitivity = 0.025f;
 	float moveSpeed = 1.5f;
 };

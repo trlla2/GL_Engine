@@ -6,7 +6,7 @@
 
 Camera::Camera()
 {
-    transform.position = glm::vec3(0.f, 1.f, 4.f);
+    transform.position = glm::vec3(0.f, 2.f, 10.f);
 }
 
 void Camera::Update(GLuint* compiledProgram, int const windowWidth, int const windowHeight)
