@@ -27,7 +27,7 @@ void WindowManager::Init(Game* currentGame)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
 	glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 
-	window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "My Engine", NULL, NULL);
+	window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "GL Engine", NULL, NULL);
 
 	glfwSetFramebufferSizeCallback(window, Resize_Window);
 

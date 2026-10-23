@@ -32,9 +32,6 @@ public:
     GLuint rockTexID = 0;
     GLuint colormapTexID = 0;
 
-    // Gradiente de color ambiental muestreado de Ambient.png
-    std::vector<glm::vec3> ambientColors;
-
     GameObject* SunGO = nullptr;
     GameObject* MoonGO = nullptr;
 
@@ -43,11 +40,6 @@ public:
     GameObject* CreateGameObject(Mesh* mesh, const char* vertexShader, const char* geometryShader, const char* fragmentShader);
 
 private:
-    const float AmbientStrength = 0.15f;
-    const glm::vec3 LigthSource = glm::vec3(0.0f, 0.0f, 1.0f);
-    const glm::vec3 LigthColor = glm::vec3( 1.0f,  1.0f,  1.0f);
-    float ambientOffset = 0.0f;
-
     void Init();
     void RunLoop();
     void Update();
